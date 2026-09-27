@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mijn Recepten</title>
+<style>
+:root{
+  --ink:#010101;
+  --brown:#704524;
+  --terracotta:#9B602D;
+  --caramel:#C59871;
+  --cream:#DCC7B7;
+  --paper:#F8F3EF;
+  --white:#FFFDFB;
+  --muted:#76675E;
+  --shadow:0 10px 30px rgba(65,38,19,.09);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);font-family:Inter, ui-sans-serif, -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding-bottom:94px}
+.topbar{padding:24px 20px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(248,243,239,.94);backdrop-filter:blur(14px);z-index:8}
+.brand{font-family:Georgia,serif;font-size:28px;letter-spacing:-.7px}.brand span{color:var(--terracotta)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--brown);font-weight:700}
+.content{padding:0 20px 28px}.eyebrow{color:var(--brown);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin-top:6px}
+h1,h2,h3,p{margin-top:0}h1{font-family:Georgia,serif;font-size:34px;line-height:1.08;margin:7px 0 18px}h2{font-family:Georgia,serif;font-size:25px;margin-bottom:14px}.sub{color:var(--muted);line-height:1.5}
+.search{display:flex;gap:10px;background:var(--white);border:1px solid rgba(112,69,36,.10);box-shadow:var(--shadow);border-radius:18px;padding:13px 15px;margin:18px 0 24px}.search input{border:0;outline:0;background:transparent;flex:1;color:var(--ink)}
+.section-row{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}.text-btn{border:0;background:transparent;color:var(--brown);font-weight:700;padding:6px}
+.featured{height:215px;border-radius:28px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--brown),var(--terracotta));padding:22px;color:white;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:flex-end}.featured:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.20),transparent 30%),radial-gradient(circle at 12% 12%,rgba(220,199,183,.28),transparent 28%)}.featured>*{position:relative}.featured .tag{align-self:flex-start;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);padding:7px 11px;border-radius:999px;font-size:12px;margin-bottom:auto}.featured h3{font-family:Georgia,serif;font-size:30px;margin:0 0 7px}.meta{display:flex;gap:14px;font-size:13px;opacity:.92}
+.chips{display:flex;gap:8px;overflow:auto;padding-bottom:4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chip{border:0;padding:10px 14px;border-radius:999px;background:var(--cream);color:var(--brown);font-weight:700;white-space:nowrap}.chip.active{background:var(--brown);color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:var(--white);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(112,69,36,.08)}.thumb{height:122px;display:flex;align-items:flex-end;padding:12px;background:linear-gradient(135deg,var(--caramel),var(--cream));position:relative}.thumb.dark{background:linear-gradient(135deg,var(--brown),var(--terracotta))}.thumb.light{background:linear-gradient(135deg,var(--cream),#efe2d8)}.thumb:after{content:"";position:absolute;width:64px;height:64px;border-radius:50%;right:-10px;top:-15px;background:rgba(255,255,255,.19)}.heart{margin-left:auto;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.85);display:grid;place-items:center;position:relative;z-index:1}.card-body{padding:13px}.card h3{font-size:15px;line-height:1.25;margin-bottom:6px}.card small{color:var(--muted)}
+.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(calc(100% - 24px),456px);height:70px;background:var(--ink);border-radius:23px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding:0 8px;box-shadow:0 15px 40px rgba(0,0,0,.22);z-index:12}.nav{border:0;background:transparent;color:#c6bdb7;font-size:11px;display:grid;gap:4px;place-items:center}.nav.active{color:white}.nav .ico{font-size:20px}.plus{width:52px;height:52px;border-radius:50%;border:4px solid var(--paper);background:var(--terracotta);color:white;font-size:28px;line-height:1;margin-top:-30px}
+.screen{display:none}.screen.active{display:block}
+.back{border:0;background:var(--white);width:42px;height:42px;border-radius:50%;box-shadow:var(--shadow);font-size:20px}.detail-hero{margin:0 20px;height:260px;border-radius:30px;background:linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel));position:relative;overflow:hidden}.detail-hero:before{content:"";position:absolute;width:220px;height:220px;border:34px solid rgba(255,255,255,.12);border-radius:50%;right:-80px;top:-60px}.detail-hero:after{content:"";position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(220,199,183,.20);left:-40px;bottom:-50px}.detail-title{padding:22px 20px 6px}.detail-title h1{margin-bottom:10px}.pillrow{display:flex;gap:8px;flex-wrap:wrap}.pill{background:var(--cream);color:var(--brown);padding:8px 11px;border-radius:999px;font-weight:700;font-size:12px}.block{background:var(--white);border-radius:24px;padding:18px;margin:14px 20px;box-shadow:var(--shadow);border:1px solid rgba(112,69,36,.07)}.ingredient{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eee5df}.ingredient:last-child{border-bottom:0}.ingredient input{accent-color:var(--terracotta);margin-top:3px}.steps{counter-reset:step}.step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:11px 0}.step:before{counter-increment:step;content:counter(step);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--brown);color:white;font-weight:700}.source{border:1px dashed var(--caramel);background:#fbf6f1}.source a{color:var(--terracotta);font-weight:700;text-decoration:none}
+.overlay{display:none;position:fixed;inset:0;background:rgba(1,1,1,.48);z-index:20;align-items:flex-end;justify-content:center}.overlay.show{display:flex}.sheet{width:min(100%,480px);max-height:88vh;overflow:auto;background:var(--paper);border-radius:30px 30px 0 0;padding:12px 20px 30px}.handle{width:44px;height:5px;background:#c8bbb1;border-radius:999px;margin:0 auto 20px}.sheet h2{margin-bottom:6px}.add-options{display:grid;gap:11px;margin-top:18px}.option{border:0;background:var(--white);box-shadow:var(--shadow);border-radius:20px;padding:17px;text-align:left;display:grid;grid-template-columns:46px 1fr;gap:13px;align-items:center;color:var(--ink)}.option-ico{width:46px;height:46px;border-radius:15px;background:var(--cream);display:grid;place-items:center;font-size:22px}.option strong{display:block;margin-bottom:4px}.option span{font-size:13px;color:var(--muted);line-height:1.35}.form{display:none}.form.show{display:block}.field{display:grid;gap:7px;margin:15px 0}.field label{font-size:13px;font-weight:700;color:var(--brown)}.field input,.field textarea,.field select{width:100%;border:1px solid #dfd0c6;background:var(--white);border-radius:14px;padding:13px;outline:0}.field textarea{min-height:110px;resize:vertical}.primary{width:100%;border:0;background:var(--brown);color:white;border-radius:16px;padding:14px 16px;font-weight:800;margin-top:8px}.secondary{width:100%;border:0;background:var(--cream);color:var(--brown);border-radius:16px;padding:13px 16px;font-weight:800;margin-top:8px}.ai-box{background:linear-gradient(135deg,#f4e8df,#fffaf6);border:1px solid #dfc7b5;border-radius:18px;padding:14px;margin:12px 0;color:var(--brown);font-size:13px;line-height:1.45}.loading{display:none;text-align:center;padding:22px;color:var(--brown)}.loading.show{display:block}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--terracotta);margin:0 3px;animation:b 1s infinite alternate}.dot:nth-child(2){animation-delay:.18s}.dot:nth-child(3){animation-delay:.36s}@keyframes b{to{transform:translateY(-7px);opacity:.45}}
+.empty{padding:36px 18px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:100px;background:var(--ink);color:white;padding:12px 15px;border-radius:14px;z-index:40;display:none}.toast.show{display:block}
+@media(min-width:700px){body{padding:20px 0}.app{border-radius:34px;overflow:hidden;box-shadow:0 25px 90px rgba(58,36,20,.14);min-height:900px}.bottom{bottom:28px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="home" class="screen active">
+    <div class="topbar"><div class="brand">Mijn <span>Recepten</span></div><div class="avatar">VR</div></div>
+    <div class="content">
+      <div class="eyebrow">Uw persoonlijke kookboek</div>
+      <h1>Wat gaan we vandaag maken?</h1>
+      <div class="search"><span>⌕</span><input id="search" placeholder="Zoek op gerecht of ingrediënt..." /></div>
+      <div class="featured" onclick="openRecipe('pasta')">
+        <div class="tag">Voor u bewaard</div><h3>Romige pasta burrata</h3><div class="meta"><span>⏱ 25 min</span><span>👥 4 personen</span></div>
+      </div>
+      <div class="section-row"><h2 style="margin:0">Categorieën</h2></div>
+      <div class="chips"><button class="chip active">Alles</button><button class="chip">Snel</button><button class="chip">Pasta</button><button class="chip">Gezond</button><button class="chip">Bakken</button><button class="chip">Vegetarisch</button></div>
+      <div class="section-row"><h2 style="margin:0">Mijn recepten</h2><button class="text-btn" onclick="showScreen('recipes')">Bekijk alles</button></div>
+      <div id="recipeGrid" class="grid"></div>
+    </div>
+  </section>
+
+  <section id="recipes" class="screen">
+    <div class="topbar"><button class="back" onclick="showScreen('home')">←</button><div class="brand" style="font-size:24px">Alle recepten</div><div style="width:42px"></div></div>
+    <div class="content"><div class="search"><span>⌕</span><input id="searchAll" placeholder="Zoek recepten..." /></div><div id="recipeGridAll" class="grid"></div></div>
+  </section>
+
+  <section id="favorites" class="screen">
+    <div class="topbar"><button class="back" onclick="showScreen('home')">←</button><div class="brand" style="font-size:24px">Favorieten</div><div style="width:42px"></div></div>
+    <div class="content"><p class="sub">Uw favoriete recepten bij elkaar.</p><div id="favoriteGrid" class="grid"></div></div>
+  </section>
+
+  <section id="detail" class="screen">
+    <div class="topbar"><button class="back" onclick="historyBack()">←</button><div class="brand" style="font-size:21px">Recept</div><button class="back" id="detailHeart" onclick="toggleFavorite(currentId)">♡</button></div>
+    <div id="detailHero" class="detail-hero"></div>
+    <div id="detailBody"></div>
+  </section>
+
+  <section id="profile" class="screen">
+    <div class="topbar"><button class="back" onclick="showScreen('home')">←</button><div class="brand" style="font-size:24px">Mijn kookboek</div><div style="width:42px"></div></div>
+    <div class="content">
+      <div class="block" style="margin:10px 0"><div class="eyebrow">Uw verzameling</div><h2 style="margin-top:8px">Rustig. Overzichtelijk. Helemaal van u.</h2><p class="sub">Hier komen later instellingen, AI-voorkeuren, dieetwensen, eenheden en synchronisatie tussen apparaten.</p></div>
+    </div>
+  </section>
+
+  <nav class="bottom">
+    <button class="nav active" data-screen="home" onclick="showScreen('home')"><span class="ico">⌂</span><span>Home</span></button>
+    <button class="nav" data-screen="recipes" onclick="showScreen('recipes')"><span class="ico">▦</span><span>Recepten</span></button>
+    <button class="nav" onclick="openAdd()"><span class="plus">+</span><span>Toevoegen</span></button>
+    <button class="nav" data-screen="favorites" onclick="showScreen('favorites')"><span class="ico">♡</span><span>Favoriet</span></button>
+    <button class="nav" data-screen="profile" onclick="showScreen('profile')"><span class="ico">◯</span><span>Profiel</span></button>
+  </nav>
+</div>
+
+<div id="addOverlay" class="overlay" onclick="closeOverlay(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div id="addMenu">
+      <div class="eyebrow">Nieuw recept</div><h2>Hoe wilt u toevoegen?</h2><p class="sub">Plak een link en laat AI het recept structureren, of vul alles zelf in.</p>
+      <div class="add-options">
+        <button class="option" onclick="showImport()"><div class="option-ico">✦</div><div><strong>Met AI uit een link</strong><span>TikTok, Instagram of een receptenwebsite.</span></div></button>
+        <button class="option" onclick="showManual()"><div class="option-ico">＋</div><div><strong>Handmatig toevoegen</strong><span>Voeg zelf naam, ingrediënten en stappen toe.</span></div></button>
+        <button class="option" onclick="showPhoto()"><div class="option-ico">▣</div><div><strong>Van foto</strong><span>Voor een recept uit een kookboek of tijdschrift.</span></div></button>
+      </div>
+    </div>
+
+    <div id="importForm" class="form">
+      <button class="text-btn" onclick="backToMenu()">← Terug</button><div class="eyebrow">AI import</div><h2>Plak de link</h2>
+      <div class="ai-box">De uiteindelijke versie laat AI de beschikbare titel, beschrijving en receptinformatie herkennen. Bij video’s blijft de originele bron bewaard.</div>
+      <div class="field"><label>Link</label><input id="importUrl" placeholder="https://www.tiktok.com/..." /></div>
+      <button class="primary" onclick="analyzeLink()">✦ Recept herkennen</button>
+      <div id="loading" class="loading">AI analyseert het recept <span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div id="importResult" class="form">
+        <div class="field"><label>Naam gerecht</label><input id="aiTitle" /></div>
+        <div class="field"><label>Ingrediënten</label><textarea id="aiIngredients"></textarea></div>
+        <div class="field"><label>Bereidingswijze</label><textarea id="aiSteps"></textarea></div>
+        <div class="field"><label>Bereidingstijd</label><input id="aiTime" value="30 min" /></div>
+        <button class="primary" onclick="saveImported()">Opslaan in mijn recepten</button>
+      </div>
+    </div>
+
+    <div id="manualForm" class="form">
+      <button class="text-btn" onclick="backToMenu()">← Terug</button><div class="eyebrow">Handmatig</div><h2>Nieuw recept</h2>
+      <div class="field"><label>Naam gerecht</label><input id="manualTitle" placeholder="Bijv. Thaise curry" /></div>
+      <div class="field"><label>Categorie</label><select id="manualCategory"><option>Diner</option><option>Lunch</option><option>Ontbijt</option><option>Bakken</option><option>Snack</option></select></div>
+      <div class="field"><label>Ingrediënten — één per regel</label><textarea id="manualIngredients" placeholder="300 g rijst\n2 paprika's\n400 ml kokosmelk"></textarea></div>
+      <div class="field"><label>Bereidingswijze — één stap per regel</label><textarea id="manualSteps" placeholder="Kook de rijst.\nBak de groenten.\nVoeg de kokosmelk toe."></textarea></div>
+      <div class="field"><label>Bereidingstijd</label><input id="manualTime" placeholder="30 min" /></div>
+      <button class="primary" onclick="saveManual()">Recept opslaan</button>
+    </div>
+
+    <div id="photoForm" class="form">
+      <button class="text-btn" onclick="backToMenu()">← Terug</button><div class="eyebrow">Foto import</div><h2>Recept vanaf foto</h2>
+      <div class="ai-box">In de uiteindelijke app kan AI een foto uitlezen en de ingrediënten en stappen automatisch omzetten naar een bewerkbaar recept.</div>
+      <div class="field"><label>Kies een foto</label><input type="file" accept="image/*" /></div>
+      <button class="primary" onclick="fakePhoto()">✦ Foto herkennen</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+const starter=[
+{id:'pasta',title:'Romige pasta burrata',category:'Pasta',time:'25 min',people:'4',favorite:true,tone:'dark',source:'TikTok',url:'https://www.tiktok.com/',ingredients:['400 g pasta','250 g cherrytomaten','1 burrata','2 teentjes knoflook','Handvol verse basilicum','Olijfolie','Peper en zout'],steps:['Kook de pasta volgens de aanwijzingen op de verpakking.','Bak de cherrytomaten met knoflook zacht in olijfolie.','Voeg de pasta toe en schep alles goed om.','Verdeel de burrata en basilicum over het gerecht en breng op smaak.']},
+{id:'bowl',title:'Krokante kip bowl',category:'Gezond',time:'35 min',people:'2',favorite:false,tone:'light',source:'Instagram',url:'https://www.instagram.com/',ingredients:['250 g kipfilet','150 g rijst','1 avocado','1 komkommer','2 el sojasaus','1 tl sesamzaad'],steps:['Kook de rijst gaar.','Bak de kip krokant.','Snijd avocado en komkommer.','Verdeel alles over kommen en werk af met sojasaus en sesam.']},
+{id:'tacos',title:'Snelle taco\'s',category:'Snel',time:'20 min',people:'3',favorite:true,tone:'',source:'Handmatig',url:'',ingredients:['8 kleine tortilla\'s','300 g gehakt','1 paprika','1 rode ui','Sla','Salsa'],steps:['Bak het gehakt rul.','Voeg paprika en ui toe.','Verwarm de tortilla\'s.','Vul ze met gehakt, groenten, sla en salsa.']},
+{id:'cake',title:'Citroen cheesecake',category:'Bakken',time:'55 min',people:'8',favorite:false,tone:'light',source:'Website',url:'https://example.com',ingredients:['200 g koekjes','80 g boter','400 g roomkaas','2 eieren','1 citroen','100 g suiker'],steps:['Maak de koekbodem en druk aan in de vorm.','Meng roomkaas, eieren, suiker en citroen.','Giet op de bodem.','Bak tot de vulling net stevig is en laat afkoelen.']}
+];
+let recipes=JSON.parse(localStorage.getItem('warmRecipes')||'null')||starter;
+let currentId='pasta', previous='home';
+function persist(){localStorage.setItem('warmRecipes',JSON.stringify(recipes))}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav[data-screen]').forEach(n=>n.classList.toggle('active',n.dataset.screen===id)); if(id!=='detail') previous=id; renderAll();window.scrollTo({top:0,behavior:'smooth'})}
+function card(r){return `<article class="card" onclick="openRecipe('${r.id}')"><div class="thumb ${r.tone||''}"><button class="heart" onclick="event.stopPropagation();toggleFavorite('${r.id}')">${r.favorite?'♥':'♡'}</button></div><div class="card-body"><h3>${escapeHtml(r.title)}</h3><small>${escapeHtml(r.category)} · ${escapeHtml(r.time||'')}</small></div></article>`}
+function renderAll(){const q=(document.getElementById('search')?.value||'').toLowerCase();let list=recipes.filter(r=>(r.title+' '+r.category+' '+r.ingredients.join(' ')).toLowerCase().includes(q));document.getElementById('recipeGrid').innerHTML=list.slice(0,6).map(card).join('')||'<div class="empty">Geen recepten gevonden.</div>';const q2=(document.getElementById('searchAll')?.value||'').toLowerCase();document.getElementById('recipeGridAll').innerHTML=recipes.filter(r=>(r.title+' '+r.category+' '+r.ingredients.join(' ')).toLowerCase().includes(q2)).map(card).join('')||'<div class="empty">Geen recepten gevonden.</div>';const fav=recipes.filter(r=>r.favorite);document.getElementById('favoriteGrid').innerHTML=fav.map(card).join('')||'<div class="empty">Nog geen favorieten.</div>'}
+function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${escapeHtml(r.category)}</div><h1>${escapeHtml(r.title)}</h1><div class="pillrow"><span class="pill">⏱ ${escapeHtml(r.time||'—')}</span><span class="pill">👥 ${escapeHtml(r.people||'—')} personen</span></div></div><div class="block"><h2>Ingrediënten</h2>${r.ingredients.map(i=>`<label class="ingredient"><input type="checkbox"><span>${escapeHtml(i)}</span></label>`).join('')}</div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${escapeHtml(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${escapeHtml(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
+function historyBack(){showScreen(previous==='detail'?'home':previous)}
+function toggleFavorite(id){const r=recipes.find(x=>x.id===id);if(r){r.favorite=!r.favorite;persist();if(document.getElementById('detail').classList.contains('active'))document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';renderAll();toast(r.favorite?'Toegevoegd aan favorieten':'Verwijderd uit favorieten')}}
+function openAdd(){document.getElementById('addOverlay').classList.add('show');backToMenu()}
+function closeOverlay(e){if(e.target.id==='addOverlay')document.getElementById('addOverlay').classList.remove('show')}
+function backToMenu(){document.getElementById('addMenu').style.display='block';['importForm','manualForm','photoForm'].forEach(id=>document.getElementById(id).classList.remove('show'));document.getElementById('importResult').classList.remove('show');document.getElementById('loading').classList.remove('show')}
+function showImport(){document.getElementById('addMenu').style.display='none';document.getElementById('importForm').classList.add('show')}
+function showManual(){document.getElementById('addMenu').style.display='none';document.getElementById('manualForm').classList.add('show')}
+function showPhoto(){document.getElementById('addMenu').style.display='none';document.getElementById('photoForm').classList.add('show')}
+function analyzeLink(){const u=document.getElementById('importUrl').value.trim();if(!u){toast('Plak eerst een link.');return}document.getElementById('loading').classList.add('show');document.getElementById('importResult').classList.remove('show');setTimeout(()=>{document.getElementById('loading').classList.remove('show');document.getElementById('aiTitle').value='Gerecht uit social video';document.getElementById('aiIngredients').value='250 g kip\n200 g rijst\n1 paprika\n1 ui\n2 el saus naar keuze';document.getElementById('aiSteps').value='Kook de rijst.\nSnijd en bak de groenten.\nBak de kip gaar.\nVoeg de saus toe en serveer samen.';document.getElementById('importResult').classList.add('show')},1300)}
+function saveImported(){const title=document.getElementById('aiTitle').value.trim();const ing=lines('aiIngredients'),steps=lines('aiSteps'),url=document.getElementById('importUrl').value.trim();if(!title||!ing.length||!steps.length){toast('Vul de ontbrekende gegevens aan.');return}recipes.unshift({id:'r'+Date.now(),title,category:'AI import',time:document.getElementById('aiTime').value||'—',people:'2',favorite:false,tone:'dark',source:url.includes('instagram')?'Instagram':url.includes('tiktok')?'TikTok':'Website',url,ingredients:ing,steps});persist();document.getElementById('addOverlay').classList.remove('show');showScreen('home');toast('Recept opgeslagen')}
+function saveManual(){const title=document.getElementById('manualTitle').value.trim(),ing=lines('manualIngredients'),steps=lines('manualSteps');if(!title||!ing.length||!steps.length){toast('Vul naam, ingrediënten en stappen in.');return}recipes.unshift({id:'r'+Date.now(),title,category:document.getElementById('manualCategory').value,time:document.getElementById('manualTime').value||'—',people:'2',favorite:false,tone:'light',source:'Handmatig',url:'',ingredients:ing,steps});persist();document.getElementById('addOverlay').classList.remove('show');showScreen('home');toast('Recept opgeslagen')}
+function fakePhoto(){toast('Foto-herkenning wordt gekoppeld aan AI in de volgende stap.')}
+function lines(id){return document.getElementById(id).value.split('\n').map(x=>x.trim()).filter(Boolean)}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function escapeHtml(s=''){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]))}
+document.getElementById('search').addEventListener('input',renderAll);document.getElementById('searchAll').addEventListener('input',renderAll);document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');const val=c.textContent;const list=val==='Alles'?recipes:recipes.filter(r=>r.category===val);document.getElementById('recipeGrid').innerHTML=list.slice(0,6).map(card).join('')||'<div class="empty">Geen recepten in deze categorie.</div>'}));renderAll();
+</script>
+</body></html>
