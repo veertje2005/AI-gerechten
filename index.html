@@ -152,5 +152,182 @@ function toast(t){const el=document.getElementById('toast');el.textContent=t;el.
 document.getElementById('search').addEventListener('input',renderAll);document.getElementById('searchAll').addEventListener('input',renderAll);document.getElementById('discoverSearch').addEventListener('input',renderDiscover);document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');const val=c.dataset.cat;const list=val==='Alles'?recipes:recipes.filter(r=>r.category===val);document.getElementById('recipeGrid').innerHTML=list.slice(0,6).map(card).join('')||'<div class="empty">Geen recepten in deze categorie.</div>'}));
 const defPriv=localStorage.getItem('smaakboekDefaultPrivate');if(defPriv==='0')document.getElementById('defaultPrivacy').classList.remove('on');setLanguage(currentLang);renderAll();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// === Smaakboek online laag: Supabase Auth + Database + Storage + AI ===
+const SUPABASE_URL = 'https://gmbswwyykadaupnrrljj.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6EF9mvye1n5fFkBWi0c0eQ_UNriQX_W';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let currentUser = null;
+let publicProfileNames = new Map();
+
+function ingredientText(i){
+  return [i.amount, i.unit, i.name, i.note ? '('+i.note+')' : ''].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
+function sourceLabel(t){
+  return ({manual:'Handmatig',website:'Website',tiktok:'TikTok',instagram:'Instagram',photo:'Foto',other:'Smaakboek'})[t] || 'Smaakboek';
+}
+function recipeFromDb(r, favIds=new Set(), ownerName='U'){
+  const total=(r.prep_minutes||0)+(r.cook_minutes||0);
+  return {
+    id:r.id,title:r.title,category:r.category||'Overig',time:total?total+' min':'—',people:r.servings||'—',
+    favorite:favIds.has(r.id),tone:'light',source:sourceLabel(r.source_type),url:r.source_url||'',image:r.image_url||'',
+    ingredients:(r.ingredients||[]).sort((a,b)=>a.position-b.position).map(ingredientText),
+    steps:(r.recipe_steps||[]).sort((a,b)=>a.position-b.position).map(x=>x.instruction),
+    isPublic:!!r.is_public,author:ownerName,userId:r.user_id,db:r
+  };
+}
+async function requireUser(){
+  if(currentUser) return currentUser;
+  toast('Log eerst in om recepten online te bewaren.');
+  openAuth('login');
+  return null;
+}
+async function loadOnlineData(){
+  const {data:{user}}=await sb.auth.getUser();
+  currentUser=user||null;
+  if(!currentUser){
+    recipes=[]; community.splice(0,community.length); renderAll(); renderAccount(); return;
+  }
+  const [{data:own,error:e1},{data:favs,error:e2}] = await Promise.all([
+    sb.from('recipes').select('*, ingredients(*), recipe_steps(*)').eq('user_id',currentUser.id).order('created_at',{ascending:false}),
+    sb.from('favorites').select('recipe_id').eq('user_id',currentUser.id)
+  ]);
+  if(e1){console.error(e1);toast('Recepten konden niet worden geladen.');return}
+  const favIds=new Set((favs||[]).map(x=>x.recipe_id));
+  recipes=(own||[]).map(r=>recipeFromDb(r,favIds,'U'));
+  await loadCommunity(favIds);
+  renderAll(); renderAccount();
+}
+async function loadCommunity(favIds=new Set()){
+  let q=sb.from('recipes').select('*, ingredients(*), recipe_steps(*)').eq('is_public',true).order('created_at',{ascending:false}).limit(60);
+  if(currentUser) q=q.neq('user_id',currentUser.id);
+  const {data:pub,error}=await q;
+  if(error){console.error(error);return}
+  const ids=[...new Set((pub||[]).map(r=>r.user_id))];
+  publicProfileNames.clear();
+  if(ids.length){
+    const {data:ps}=await sb.from('profiles').select('id,display_name,username').in('id',ids);
+    (ps||[]).forEach(p=>publicProfileNames.set(p.id,p.display_name||p.username||'Smaakboek-gebruiker'));
+  }
+  community.splice(0,community.length,...(pub||[]).map(r=>recipeFromDb(r,favIds,publicProfileNames.get(r.user_id)||'Smaakboek-gebruiker')));
+}
+
+async function submitAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const pass=document.getElementById('authPassword').value;
+  if(!email||pass.length<8){toast('Vul een geldig e-mailadres en minimaal 8 tekens in.');return}
+  const btn=document.getElementById('authSubmit'); btn.disabled=true; btn.textContent='Even geduld…';
+  try{
+    if(authMode==='signup'){
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:email.split('@')[0]}}});
+      if(error) throw error;
+      closeAuth();
+      if(data.session){toast('Account aangemaakt en ingelogd.');await loadOnlineData()}
+      else toast('Account aangemaakt. Controleer uw e-mail om het account te bevestigen.');
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error) throw error;
+      closeAuth(); toast('Ingelogd.'); await loadOnlineData();
+    }
+  }catch(e){console.error(e);toast(e.message||'Inloggen is niet gelukt.')}
+  finally{btn.disabled=false;btn.textContent=authMode==='signup'?'Account maken':'Inloggen'}
+}
+async function logout(){await sb.auth.signOut();currentUser=null;recipes=[];community.splice(0,community.length);renderAll();renderAccount();toast('Uitgelogd')}
+function renderAccount(){
+  const out=document.getElementById('signedOut'), inn=document.getElementById('signedIn');
+  out.style.display=currentUser?'none':'block'; inn.style.display=currentUser?'block':'none';
+  if(currentUser) document.getElementById('accountEmail').textContent=currentUser.email||'';
+  const demo=document.querySelector('#authOverlay .ai-box'); if(demo) demo.style.display='none';
+}
+
+async function insertRecipeRecord({title,category,time,ingredients,steps,isPublic,sourceType='manual',sourceUrl='',servings=null,imageUrl=''} ){
+  const u=await requireUser(); if(!u) return null;
+  const mins=parseInt(String(time||'').match(/\d+/)?.[0]||'')||null;
+  const {data:r,error}=await sb.from('recipes').insert({user_id:u.id,title,category:category||null,prep_minutes:mins,cook_minutes:null,servings:servings?Number(servings):null,is_public:!!isPublic,source_type:sourceType,source_url:sourceUrl||null,image_url:imageUrl||null,language:currentLang}).select().single();
+  if(error) throw error;
+  const ingRows=ingredients.map((txt,i)=>({recipe_id:r.id,position:i,name:txt,amount:'',unit:'',note:''}));
+  const stepRows=steps.map((txt,i)=>({recipe_id:r.id,position:i,instruction:txt}));
+  if(ingRows.length){const {error:e}=await sb.from('ingredients').insert(ingRows);if(e) throw e}
+  if(stepRows.length){const {error:e}=await sb.from('recipe_steps').insert(stepRows);if(e) throw e}
+  return r;
+}
+async function saveManual(){
+  const title=document.getElementById('manualTitle').value.trim(),ing=lines('manualIngredients'),steps=lines('manualSteps');
+  if(!title||!ing.length||!steps.length){toast('Vul naam, ingrediënten en stappen in.');return}
+  try{await insertRecipeRecord({title,category:document.getElementById('manualCategory').value,time:document.getElementById('manualTime').value,ingredients:ing,steps,isPublic:!manualPrivate,sourceType:'manual'});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
+}
+async function saveImported(){
+  const title=document.getElementById('aiTitle').value.trim(),ing=lines('aiIngredients'),steps=lines('aiSteps'),url=document.getElementById('importUrl').value.trim();
+  if(!title||!ing.length||!steps.length){toast('Vul de ontbrekende gegevens aan.');return}
+  const st=url.includes('instagram')?'instagram':url.includes('tiktok')?'tiktok':'website';
+  try{await insertRecipeRecord({title,category:'AI import',time:document.getElementById('aiTime').value,ingredients:ing,steps,isPublic:!aiPrivate,sourceType:st,sourceUrl:url});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
+}
+async function uploadRecipeImage(file){
+  const u=await requireUser(); if(!u) return '';
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`${u.id}/${crypto.randomUUID()}.${ext}`;
+  const {error}=await sb.storage.from('recipe-images').upload(path,file,{contentType:file.type||'image/jpeg',upsert:false});
+  if(error) throw error;
+  return sb.storage.from('recipe-images').getPublicUrl(path).data.publicUrl;
+}
+async function savePhotoRecipe(){
+  const title=document.getElementById('photoTitle').value.trim(),ing=lines('photoIngredients'),steps=lines('photoSteps');
+  if(!title||!ing.length||!steps.length){toast('Controleer naam, ingrediënten en bereidingswijze.');return}
+  const f=document.getElementById('photoInput').files?.[0];
+  try{const imageUrl=f?await uploadRecipeImage(f):'';await insertRecipeRecord({title,category:'Uit kookboek',time:document.getElementById('photoTime').value,ingredients:ing,steps,isPublic:!photoPrivate,sourceType:'photo',imageUrl});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept vanaf foto opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
+}
+async function toggleFavorite(id){
+  const u=await requireUser(); if(!u)return;
+  const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id); if(!r)return;
+  try{
+    if(r.favorite){await sb.from('favorites').delete().eq('user_id',u.id).eq('recipe_id',id);r.favorite=false}
+    else{const {error}=await sb.from('favorites').insert({user_id:u.id,recipe_id:id});if(error)throw error;r.favorite=true}
+    await loadOnlineData(); if(document.getElementById('detail').classList.contains('active'))openRecipe(id); toast(r.favorite?'Toegevoegd aan favorieten':'Verwijderd uit favorieten');
+  }catch(e){console.error(e);toast('Favoriet aanpassen is niet gelukt.')}
+}
+async function toggleRecipePrivacy(id){
+  const r=recipes.find(x=>x.id===id);if(!r){toast('Alleen uw eigen recept kan worden aangepast.');return}
+  const {error}=await sb.from('recipes').update({is_public:!r.isPublic}).eq('id',id);
+  if(error){console.error(error);toast('Privacy aanpassen is niet gelukt.');return}
+  await loadOnlineData();openRecipe(id);toast(!r.isPublic?'Recept is nu openbaar':'Recept is nu privé');
+}
+async function saveCommunity(id){
+  const r=community.find(x=>x.id===id);if(!r)return;
+  try{await insertRecipeRecord({title:r.title,category:r.category,time:r.time,ingredients:r.ingredients,steps:r.steps,isPublic:false,sourceType:'other',sourceUrl:r.url});await loadOnlineData();toast('Recept bewaard in uw Smaakboek')}catch(e){console.error(e);toast('Bewaren is niet gelukt.')}
+}
+
+function fileToDataUrl(file){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(file)})}
+function applyAiRecipe(rec,prefix){
+  const ing=(rec.ingredients||[]).map(i=>[i.amount,i.unit,i.name,i.note?`(${i.note})`:''].filter(Boolean).join(' ').replace(/\s+/g,' ').trim());
+  document.getElementById(prefix+'Title').value=rec.title||'';
+  document.getElementById(prefix+'Ingredients').value=ing.join('\n');
+  document.getElementById(prefix+'Steps').value=(rec.steps||[]).join('\n');
+  const total=(rec.prep_minutes||0)+(rec.cook_minutes||0);document.getElementById(prefix+'Time').value=total?total+' min':'';
+  if(rec.missing_information?.length) toast('AI-resultaat klaar. Controleer nog: '+rec.missing_information.slice(0,2).join(', '));
+}
+async function invokeAi(payload){
+  const u=await requireUser();if(!u)throw new Error('Log eerst in.');
+  const {data,error}=await sb.functions.invoke('analyze-recipe',{body:payload});
+  if(error) throw error;
+  if(data?.error) throw new Error(data.error);
+  return data.recipe;
+}
+async function analyzePhoto(){
+  const f=document.getElementById('photoInput').files?.[0];if(!f){toast('Kies of maak eerst een foto.');return}
+  document.getElementById('photoLoading').classList.add('show');document.getElementById('photoResult').classList.remove('show');
+  try{const dataUrl=await fileToDataUrl(f);const rec=await invokeAi({mode:'photo',image_data_url:dataUrl,language:currentLang});applyAiRecipe(rec,'photo');document.getElementById('photoResult').classList.add('show');toast('Foto met AI herkend. Controleer het resultaat.')}catch(e){console.error(e);toast(e.message||'Foto analyseren is niet gelukt.')}finally{document.getElementById('photoLoading').classList.remove('show')}
+}
+async function analyzeLink(){
+  const u=document.getElementById('importUrl').value.trim();if(!u){toast('Plak eerst een link.');return}
+  document.getElementById('loading').classList.add('show');document.getElementById('importResult').classList.remove('show');
+  try{const rec=await invokeAi({mode:'url',url:u,language:currentLang});applyAiRecipe(rec,'ai');document.getElementById('importResult').classList.add('show');toast('AI-import klaar. Controleer het resultaat.')}catch(e){console.error(e);toast(e.message||'Deze link kon niet volledig worden geanalyseerd.')}finally{document.getElementById('loading').classList.remove('show')}
+}
+
+sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(loadOnlineData,0)});
+loadOnlineData();
+</script>
+
 </body>
 </html>
