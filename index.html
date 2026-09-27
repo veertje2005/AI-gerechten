@@ -22,14 +22,14 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
 .photo-preview{display:none;margin:14px 0;border-radius:22px;overflow:hidden;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow)}.photo-preview.show{display:block}.photo-preview img{display:block;width:100%;max-height:260px;object-fit:cover}.photo-preview .caption{padding:10px 13px;color:var(--muted);font-size:12px}.photo-result{display:none}.photo-result.show{display:block}.empty-start{grid-column:1/-1;background:var(--white);border:1px dashed var(--caramel);border-radius:22px;padding:24px;text-align:center;color:var(--muted)}.empty-start strong{display:block;color:var(--brown);font-family:var(--serif);font-size:24px;margin-bottom:6px}.empty-start button{margin-top:12px;border:0;background:var(--brown);color:white;border-radius:14px;padding:11px 15px;font-weight:700}
 .overlay{display:none;position:fixed;inset:0;background:rgba(1,1,1,.48);z-index:30;align-items:flex-end;justify-content:center}.overlay.show{display:flex}.sheet{width:min(100%,480px);max-height:92vh;overflow:auto;background:var(--paper);border-radius:30px 30px 0 0;padding:12px 20px 30px}.handle{width:44px;height:5px;background:#c8bbb1;border-radius:999px;margin:0 auto 20px}.add-options{display:grid;gap:11px;margin-top:18px}.option{border:0;background:var(--white);box-shadow:var(--shadow);border-radius:20px;padding:17px;text-align:left;display:grid;grid-template-columns:48px 1fr auto;gap:13px;align-items:center;color:var(--ink)}.option-ico{width:48px;height:48px;border-radius:15px;background:var(--cream);display:grid;place-items:center;font-size:22px}.option strong{display:block;margin-bottom:4px}.option span{font-size:13px;color:var(--muted);line-height:1.35}.form{display:none}.form.show{display:block}.field{display:grid;gap:7px;margin:15px 0}.field label{font-size:13px;font-weight:700;color:var(--brown)}.field input,.field textarea,.field select{width:100%;border:1px solid #dfd0c6;background:var(--white);border-radius:14px;padding:13px;outline:0}.field textarea{min-height:110px;resize:vertical}.primary{width:100%;border:0;background:var(--brown);color:white;border-radius:16px;padding:14px 16px;font-weight:800;margin-top:8px}.secondary{width:100%;border:0;background:var(--cream);color:var(--brown);border-radius:16px;padding:13px 16px;font-weight:800;margin-top:8px}.ai-box{background:linear-gradient(135deg,#f4e8df,#fffaf6);border:1px solid #dfc7b5;border-radius:18px;padding:14px;margin:12px 0;color:var(--brown);font-size:13px;line-height:1.45}.source-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.source-tab{border:1px solid var(--line);background:var(--white);border-radius:14px;padding:10px 6px;font-weight:700;color:var(--brown)}.source-tab.active{background:var(--brown);color:white;border-color:var(--brown)}.import-help{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 0}.num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--cream);color:var(--brown);font-weight:700;font-size:12px}.status{display:flex;align-items:center;gap:9px;padding:10px 0;color:var(--muted);font-size:13px}.status.done{color:var(--green)}.loading{display:none;text-align:center;padding:18px;color:var(--brown)}.loading.show{display:block}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--terracotta);margin:0 3px;animation:b 1s infinite alternate}.dot:nth-child(2){animation-delay:.18s}.dot:nth-child(3){animation-delay:.36s}@keyframes b{to{transform:translateY(-7px);opacity:.45}}
-.discover-card{background:var(--white);border:1px solid rgba(112,69,36,.08);border-radius:22px;padding:15px;box-shadow:var(--shadow);margin-bottom:12px}.discover-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}.discover-avatar{width:38px;height:38px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--brown);font-weight:700}.discover-meta{flex:1}.discover-meta strong{display:block;font-size:14px}.discover-meta span{color:var(--muted);font-size:12px}.discover-photo{height:150px;border-radius:18px;background:linear-gradient(135deg,var(--caramel),var(--cream));margin-bottom:12px}.discover-actions{display:flex;justify-content:space-between;align-items:center}.small-btn{border:0;background:var(--cream);color:var(--brown);font-weight:700;border-radius:999px;padding:9px 12px}.profile-card{background:var(--white);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}.profile-head{display:flex;align-items:center;gap:14px}.profile-big{width:62px;height:62px;border-radius:50%;background:var(--brown);color:white;display:grid;place-items:center;font-size:20px;font-weight:700}.setting{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting label{font-weight:600}.setting small{display:block;color:var(--muted);margin-top:3px}.toggle{width:48px;height:28px;border-radius:999px;background:#cfc2b9;border:0;padding:3px}.toggle:after{content:"";display:block;width:22px;height:22px;border-radius:50%;background:white;transition:.2s}.toggle.on{background:var(--brown)}.toggle.on:after{transform:translateX(20px)}.empty{padding:36px 18px;text-align:center;color:var(--muted)}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:100px;background:var(--ink);color:white;padding:12px 15px;border-radius:14px;z-index:50;display:none}.toast.show{display:block}.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:var(--cream);color:var(--brown);font-size:11px;font-weight:700}.privacy-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.privacy-option{border:1px solid var(--line);background:var(--white);border-radius:16px;padding:13px;text-align:left}.privacy-option.active{border-color:var(--brown);box-shadow:0 0 0 2px rgba(112,69,36,.09)}.privacy-option strong{display:block;color:var(--brown);margin-bottom:3px}.privacy-option span{font-size:12px;color:var(--muted)}
+.discover-card{background:var(--white);border:1px solid rgba(112,69,36,.08);border-radius:22px;padding:15px;box-shadow:var(--shadow);margin-bottom:12px}.discover-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}.discover-avatar{width:38px;height:38px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--brown);font-weight:700}.discover-meta{flex:1}.discover-meta strong{display:block;font-size:14px}.discover-meta span{color:var(--muted);font-size:12px}.discover-photo{height:150px;border-radius:18px;background:linear-gradient(135deg,var(--caramel),var(--cream));margin-bottom:12px}.discover-actions{display:flex;justify-content:space-between;align-items:center}.small-btn{border:0;background:var(--cream);color:var(--brown);font-weight:700;border-radius:999px;padding:9px 12px}.profile-card{background:var(--white);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}.profile-head{display:flex;align-items:center;gap:14px}.profile-avatar-wrap{position:relative;flex:0 0 auto}.profile-big{width:78px;height:78px;border-radius:50%;background:var(--brown);color:white;display:grid;place-items:center;font-size:22px;font-weight:700;overflow:hidden;border:3px solid var(--white);box-shadow:0 8px 22px rgba(112,69,36,.16)}.profile-big img{width:100%;height:100%;object-fit:cover}.avatar-edit{position:absolute;right:-4px;bottom:-2px;width:30px;height:30px;border-radius:50%;border:2px solid var(--white);background:var(--terracotta);color:#fff;display:grid;place-items:center;font-size:14px;box-shadow:var(--shadow)}.profile-fields{display:grid;gap:12px;margin-top:18px}.profile-field{display:grid;gap:6px}.profile-field label{font-size:12px;font-weight:800;color:var(--brown);text-transform:uppercase;letter-spacing:.05em}.profile-field input{width:100%;border:1px solid #dfd0c6;background:var(--white);border-radius:14px;padding:12px 13px;outline:0}.profile-field input:disabled{background:#f7f1ec;color:var(--muted)}.setting{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:0}.setting label{font-weight:600}.setting small{display:block;color:var(--muted);margin-top:3px}.toggle{width:48px;height:28px;border-radius:999px;background:#cfc2b9;border:0;padding:3px}.toggle:after{content:"";display:block;width:22px;height:22px;border-radius:50%;background:white;transition:.2s}.toggle.on{background:var(--brown)}.toggle.on:after{transform:translateX(20px)}.empty{padding:36px 18px;text-align:center;color:var(--muted)}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:100px;background:var(--ink);color:white;padding:12px 15px;border-radius:14px;z-index:50;display:none}.toast.show{display:block}.badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:var(--cream);color:var(--brown);font-size:11px;font-weight:700}.privacy-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.privacy-option{border:1px solid var(--line);background:var(--white);border-radius:16px;padding:13px;text-align:left}.privacy-option.active{border-color:var(--brown);box-shadow:0 0 0 2px rgba(112,69,36,.09)}.privacy-option strong{display:block;color:var(--brown);margin-bottom:3px}.privacy-option span{font-size:12px;color:var(--muted)}
 @media(min-width:700px){body{padding:20px 0}.app{border-radius:34px;overflow:hidden;box-shadow:0 25px 90px rgba(58,36,20,.14);min-height:900px}.bottom{bottom:28px}}
 </style>
 </head>
 <body>
 <div class="app">
   <section id="home" class="screen active">
-    <div class="topbar"><div class="brand">Smaak<span>boek</span></div><button class="avatar" onclick="showScreen('profile')">SB</button></div>
+    <div class="topbar"><div class="brand">Smaak<span>boek</span></div><button id="topProfileAvatar" class="avatar" onclick="showScreen('profile')">SB</button></div>
     <div class="content">
       <div class="eyebrow" data-t="personalCookbook">Uw persoonlijke kookboek</div>
       <h1 data-t="whatCook">Wat gaan we vandaag maken?</h1>
@@ -62,7 +62,22 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
     <div class="topbar"><div class="brand" data-t="profile">Profiel</div><button class="iconbtn" onclick="showScreen('home')">⌂</button></div>
     <div class="content">
       <div id="signedOut" class="profile-card"><div class="eyebrow" data-t="account">Account</div><h2 data-t="saveEverywhere">Bewaar uw recepten overal</h2><p class="sub" data-t="accountExplain">Maak een account met e-mailadres en wachtwoord. Zo kunt u later op meerdere apparaten bij dezelfde recepten.</p><button class="primary" onclick="openAuth('signup')" data-t="createAccount">Account maken</button><button class="secondary" onclick="openAuth('login')" data-t="login">Inloggen</button></div>
-      <div id="signedIn" class="profile-card" style="display:none"><div class="profile-head"><div class="profile-big">SB</div><div><strong id="accountEmail">naam@example.nl</strong><div class="sub" style="font-size:13px">Smaakboek-account</div></div></div><button class="secondary" onclick="logout()" data-t="logout">Uitloggen</button></div>
+      <div id="signedIn" class="profile-card" style="display:none">
+        <div class="profile-head">
+          <div class="profile-avatar-wrap">
+            <div id="profileAvatar" class="profile-big"><span id="profileInitials">SB</span><img id="profileAvatarImg" alt="Profielfoto" style="display:none"></div>
+            <button class="avatar-edit" type="button" onclick="document.getElementById('profilePhotoInput').click()" aria-label="Profielfoto wijzigen">✎</button>
+            <input id="profilePhotoInput" type="file" accept="image/*" style="display:none" onchange="handleProfilePhoto(event)">
+          </div>
+          <div><strong id="profileDisplayTitle">Uw naam</strong><div class="sub" style="font-size:13px">Uw openbare profielnaam</div></div>
+        </div>
+        <div class="profile-fields">
+          <div class="profile-field"><label for="profileName">Naam</label><input id="profileName" type="text" maxlength="60" placeholder="Uw naam"></div>
+          <div class="profile-field"><label>E-mailadres <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)">· alleen zichtbaar voor u</span></label><input id="profileEmail" type="email" disabled></div>
+        </div>
+        <button id="saveProfileBtn" class="primary" onclick="saveProfile()">Profiel opslaan</button>
+        <button class="secondary" onclick="logout()" data-t="logout">Uitloggen</button>
+      </div>
       <div class="profile-card"><h2 data-t="settings">Instellingen</h2><div class="setting"><div><label data-t="language">Taal</label><small data-t="languageExplain">Wijzig de taal van de app</small></div><select id="languageSelect" onchange="setLanguage(this.value)"><option value="nl">Nederlands</option><option value="en">English</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div><div class="setting"><div><label data-t="defaultPrivate">Standaard privé</label><small data-t="privacyExplain">Nieuwe recepten zijn alleen voor u zichtbaar</small></div><button id="defaultPrivacy" class="toggle on" onclick="toggleDefaultPrivacy()"></button></div></div>
     </div>
   </section>
@@ -160,6 +175,7 @@ const SUPABASE_URL = 'https://gmbswwyykadaupnrrljj.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6EF9mvye1n5fFkBWi0c0eQ_UNriQX_W';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let currentUser = null;
+let currentProfile = null;
 let publicProfileNames = new Map();
 
 function ingredientText(i){
@@ -188,12 +204,15 @@ async function loadOnlineData(){
   const {data:{user}}=await sb.auth.getUser();
   currentUser=user||null;
   if(!currentUser){
-    recipes=[]; community.splice(0,community.length); renderAll(); renderAccount(); return;
+    currentProfile=null; recipes=[]; community.splice(0,community.length); renderAll(); renderAccount(); return;
   }
-  const [{data:own,error:e1},{data:favs,error:e2}] = await Promise.all([
+  const [{data:own,error:e1},{data:favs,error:e2},{data:profile,error:e3}] = await Promise.all([
     sb.from('recipes').select('*, ingredients(*), recipe_steps(*)').eq('user_id',currentUser.id).order('created_at',{ascending:false}),
-    sb.from('favorites').select('recipe_id').eq('user_id',currentUser.id)
+    sb.from('favorites').select('recipe_id').eq('user_id',currentUser.id),
+    sb.from('profiles').select('id,display_name,username,avatar_url,preferred_language').eq('id',currentUser.id).maybeSingle()
   ]);
+  if(e3) console.error(e3);
+  currentProfile=profile||null;
   if(e1){console.error(e1);toast('Recepten konden niet worden geladen.');return}
   const favIds=new Set((favs||[]).map(x=>x.recipe_id));
   recipes=(own||[]).map(r=>recipeFromDb(r,favIds,'U'));
@@ -221,7 +240,7 @@ async function submitAuth(){
   const btn=document.getElementById('authSubmit'); btn.disabled=true; btn.textContent='Even geduld…';
   try{
     if(authMode==='signup'){
-      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:email.split('@')[0]}}});
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:'Smaakboek-gebruiker'}}});
       if(error) throw error;
       closeAuth();
       if(data.session){toast('Account aangemaakt en ingelogd.');await loadOnlineData()}
@@ -234,12 +253,65 @@ async function submitAuth(){
   }catch(e){console.error(e);toast(e.message||'Inloggen is niet gelukt.')}
   finally{btn.disabled=false;btn.textContent=authMode==='signup'?'Account maken':'Inloggen'}
 }
-async function logout(){await sb.auth.signOut();currentUser=null;recipes=[];community.splice(0,community.length);renderAll();renderAccount();toast('Uitgelogd')}
+async function logout(){await sb.auth.signOut();currentUser=null;currentProfile=null;recipes=[];community.splice(0,community.length);renderAll();renderAccount();toast('Uitgelogd')}
+function profileInitials(name,email=''){
+  const src=(name||email.split('@')[0]||'SB').trim();
+  const parts=src.split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0]||'S')+(parts.length>1?(parts[parts.length-1][0]||''):(parts[0]?.[1]||'B'))).toUpperCase();
+}
+function paintProfileAvatar(url,name,email=''){
+  const initials=profileInitials(name,email);
+  const img=document.getElementById('profileAvatarImg'), init=document.getElementById('profileInitials');
+  if(init) init.textContent=initials;
+  if(img){ if(url){img.src=url;img.style.display='block';if(init)init.style.display='none'}else{img.removeAttribute('src');img.style.display='none';if(init)init.style.display='inline'} }
+  const top=document.getElementById('topProfileAvatar');
+  if(top){
+    if(url){top.innerHTML=`<img src="${esc(url)}" alt="Profiel" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`}
+    else top.textContent=initials;
+  }
+}
 function renderAccount(){
   const out=document.getElementById('signedOut'), inn=document.getElementById('signedIn');
   out.style.display=currentUser?'none':'block'; inn.style.display=currentUser?'block':'none';
-  if(currentUser) document.getElementById('accountEmail').textContent=currentUser.email||'';
+  if(currentUser){
+    const name=currentProfile?.display_name||currentProfile?.username||currentUser.user_metadata?.display_name||'Smaakboek-gebruiker';
+        document.getElementById('profileEmail').value=currentUser.email||'';
+    document.getElementById('profileName').value=name;
+    document.getElementById('profileDisplayTitle').textContent=name||'Uw naam';
+    paintProfileAvatar(currentProfile?.avatar_url||'',name,currentUser.email||'');
+  }else{
+    const top=document.getElementById('topProfileAvatar'); if(top) top.textContent='SB';
+  }
   const demo=document.querySelector('#authOverlay .ai-box'); if(demo) demo.style.display='none';
+}
+async function saveProfile(){
+  const u=await requireUser(); if(!u) return;
+  const name=document.getElementById('profileName').value.trim();
+  if(!name){toast('Vul eerst uw naam in.');return}
+  const btn=document.getElementById('saveProfileBtn'); btn.disabled=true; btn.textContent='Opslaan…';
+  try{
+    const {data,error}=await sb.from('profiles').update({display_name:name,preferred_language:currentLang,updated_at:new Date().toISOString()}).eq('id',u.id).select('id,display_name,username,avatar_url,preferred_language').single();
+    if(error) throw error;
+    currentProfile=data; renderAccount(); toast('Profiel opgeslagen.');
+  }catch(e){console.error(e);toast(e.message||'Profiel opslaan is niet gelukt.')}
+  finally{btn.disabled=false;btn.textContent='Profiel opslaan'}
+}
+async function handleProfilePhoto(event){
+  const file=event.target.files?.[0]; if(!file) return;
+  const u=await requireUser(); if(!u) return;
+  if(file.size>5*1024*1024){toast('Kies een foto kleiner dan 5 MB.');event.target.value='';return}
+  try{
+    toast('Profielfoto wordt geüpload…');
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const path=`${u.id}/${crypto.randomUUID()}.${ext}`;
+    const {error:uploadError}=await sb.storage.from('profile-avatars').upload(path,file,{contentType:file.type||'image/jpeg',upsert:false});
+    if(uploadError) throw uploadError;
+    const url=sb.storage.from('profile-avatars').getPublicUrl(path).data.publicUrl;
+    const {data,error}=await sb.from('profiles').update({avatar_url:url,updated_at:new Date().toISOString()}).eq('id',u.id).select('id,display_name,username,avatar_url,preferred_language').single();
+    if(error) throw error;
+    currentProfile=data; renderAccount(); toast('Profielfoto bijgewerkt.');
+  }catch(e){console.error(e);toast(e.message||'Foto uploaden is niet gelukt.')}
+  finally{event.target.value=''}
 }
 
 async function insertRecipeRecord({title,category,time,ingredients,steps,isPublic,sourceType='manual',sourceUrl='',servings=null,imageUrl=''} ){
