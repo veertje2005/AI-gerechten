@@ -125,9 +125,9 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
 <div id="addOverlay" class="overlay" onclick="closeOverlay(event)"><div class="sheet"><div class="handle"></div>
   <div id="addMenu"><div class="eyebrow" data-t="addRecipe">Recept toevoegen</div><h2 data-t="howAdd">Hoe wilt u toevoegen?</h2><p class="sub" data-t="addExplain">Voeg recepten toe via screenshots, een foto of handmatig.</p><div class="add-options">
-    <button class="option" onclick="showImport()"><div class="option-ico">✦</div><div><strong data-t="socialImport">Recept van social media</strong><span data-t="socialImportExplain">Upload maximaal 3 screenshots. Smaakboek haalt daar het recept uit.</span></div><b>›</b></button>
+    <button class="option" onclick="showImport()"><div class="option-ico">✦</div><div><strong data-t="socialImport">Recept van social media</strong><span data-t="socialImportExplain">Upload 1 of 2 foto's van de ingrediënten en 1 of 2 foto's van de bereidingswijze.</span></div><b>›</b></button>
     <button class="option" onclick="showManual()"><div class="option-ico">＋</div><div><strong data-t="manual">Handmatig toevoegen</strong><span data-t="manualExplain">Voeg zelf naam, ingrediënten en bereidingswijze toe.</span></div><b>›</b></button>
-    <button class="option" onclick="showPhoto()"><div class="option-ico">▣</div><div><strong data-t="photo">Vanaf foto</strong><span data-t="photoExplain">Maak van een foto van een recept een digitaal recept.</span></div><b>›</b></button>
+    <button class="option" onclick="showPhoto()"><div class="option-ico">▣</div><div><strong data-t="photo">Vanaf foto's</strong><span data-t="photoExplain">Maak van een foto van een recept een digitaal recept.</span></div><b>›</b></button>
   </div></div>
 
   <div id="importForm" class="form">
@@ -137,23 +137,31 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
     <div class="ai-box">
       <div class="import-help"><span class="num">1</span><div><strong>Maak screenshots</strong><div>Maak screenshots van de ingrediënten en bereidingswijze uit TikTok, Instagram of Facebook.</div></div></div>
-      <div class="import-help"><span class="num">2</span><div><strong>Upload maximaal 3 screenshots</strong><div>U kunt bijvoorbeeld één screenshot met ingrediënten en twee met bereidingsstappen toevoegen.</div></div></div>
-      <div class="import-help"><span class="num">3</span><div><strong>Controleer het resultaat</strong><div>Smaakboek combineert de informatie uit alle screenshots tot één recept.</div></div></div>
+      <div class="import-help"><span class="num">2</span><div><strong>Upload per onderdeel</strong><div>Bij Ingrediënten kunt u 1 of 2 foto's uploaden en bij Bereidingswijze ook 1 of 2 foto's.</div></div></div>
+      <div class="import-help"><span class="num">3</span><div><strong>Controleer het resultaat</strong><div>Smaakboek leest de twee onderdelen apart en zet ze daarna netjes samen in één recept.</div></div></div>
     </div>
 
     <div class="social-upload-box">
-      <label for="socialScreenshots">Screenshots kiezen</label>
-      <input id="socialScreenshots" type="file" accept="image/*" multiple onchange="previewSocialScreenshots(event)" />
-      <div class="small-note">Maximaal 3 afbeeldingen. Zorg dat de tekst zo duidelijk mogelijk leesbaar is.</div>
-      <div id="socialFileCount" class="social-file-count">Nog geen screenshots gekozen</div>
-      <div id="socialPreviewGrid" class="social-preview-grid"></div>
+      <label for="ingredientScreenshots">Ingrediënten uploaden</label>
+      <input id="ingredientScreenshots" type="file" accept="image/*" multiple onchange="previewGroupedScreenshots('ingredient')" />
+      <div class="small-note">Upload 1 of 2 foto's waarop de ingrediënten duidelijk zichtbaar zijn.</div>
+      <div id="ingredientFileCount" class="social-file-count">Nog geen foto's gekozen</div>
+      <div id="ingredientPreviewGrid" class="social-preview-grid"></div>
     </div>
 
-    <button class="primary" onclick="analyzeSocialScreenshots()">✦ Recept herkennen met AI</button>
-    <div id="loading" class="loading">Screenshots analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="social-upload-box">
+      <label for="stepScreenshots">Bereidingswijze uploaden</label>
+      <input id="stepScreenshots" type="file" accept="image/*" multiple onchange="previewGroupedScreenshots('steps')" />
+      <div class="small-note">Upload 1 of 2 foto's waarop de bereidingswijze duidelijk zichtbaar is.</div>
+      <div id="stepFileCount" class="social-file-count">Nog geen foto's gekozen</div>
+      <div id="stepPreviewGrid" class="social-preview-grid"></div>
+    </div>
+
+    <button class="primary" onclick="analyzeGroupedScreenshots()">✦ Recept herkennen met AI</button>
+    <div id="loading" class="loading">Foto's analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
 
     <div id="importResult" class="form">
-      <div class="status done">✓ Screenshots gelezen</div>
+      <div class="status done">✓ Foto's gelezen</div>
       <div class="status done">✓ Ingrediënten opgesteld</div>
       <div class="status done">✓ Bereidingsstappen opgesteld</div>
       <div class="field"><label data-t="title">Naam gerecht</label><input id="aiTitle" /></div>
@@ -167,7 +175,48 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
   <div id="manualForm" class="form"><button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button><div class="eyebrow" data-t="manual">Handmatig toevoegen</div><h2 data-t="newRecipe">Nieuw recept</h2><div class="field"><label data-t="title">Naam gerecht</label><input id="manualTitle" /></div><div class="field"><label data-t="category">Categorie</label><select id="manualCategory"><option>Snel</option><option>Pasta</option><option>Gezond</option><option>Bakken</option><option>Vegetarisch</option></select></div><div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="manualIngredients"></textarea></div><div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="manualSteps"></textarea></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="manualTime" placeholder="30 min" /></div><div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="manualPrivate" class="privacy-option active" onclick="setPrivacy('manual',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="manualPublic" class="privacy-option" onclick="setPrivacy('manual',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div><button class="primary" onclick="saveManual()" data-t="saveRecipe">Recept opslaan</button></div>
 
-  <div id="photoForm" class="form"><button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button><div class="eyebrow" data-t="photo">Vanaf foto</div><h2 data-t="photoRecipe">Recept vanaf foto</h2><div class="ai-box" data-t="photoAiExplain">Maak een foto van een kookboek, tijdschrift of handgeschreven recept. Smaakboek zet de tekst daarna om naar een digitaal recept dat u eerst kunt controleren.</div><div class="field"><label data-t="choosePhoto">Kies of maak een foto</label><input id="photoInput" type="file" accept="image/*" capture="environment" onchange="previewPhoto(event)" /></div><div id="photoPreview" class="photo-preview"><img id="photoPreviewImg" alt="Voorbeeld receptfoto"><div class="caption">Controleer of de tekst goed leesbaar en volledig in beeld staat.</div></div><button class="primary" onclick="analyzePhoto()">✦ <span data-t="recognizePhoto">Foto met AI herkennen</span></button><div id="photoLoading" class="loading">Foto analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div id="photoResult" class="photo-result"><div class="status done">✓ Tekst uit foto herkend</div><div class="field"><label data-t="title">Naam gerecht</label><input id="photoTitle" /></div><div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="photoIngredients"></textarea></div><div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="photoSteps"></textarea></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="photoTime" placeholder="30 min" /></div><div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="photoPrivate" class="privacy-option active" onclick="setPrivacy('photo',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="photoPublic" class="privacy-option" onclick="setPrivacy('photo',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div><button class="primary" onclick="savePhotoRecipe()" data-t="saveRecipe">Recept opslaan</button></div></div>
+  <div id="photoForm" class="form">
+  <button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button>
+  <div class="eyebrow" data-t="photo">Vanaf foto's</div>
+  <h2>Recept vanaf foto's</h2>
+  <div class="ai-box">
+    Upload ingrediënten en bereidingswijze apart. U kunt per onderdeel 1 of 2 foto's kiezen. Smaakboek leest de foto's en zet alles daarna samen in één recept.
+  </div>
+
+  <div class="social-upload-box">
+    <label for="photoIngredientScreenshots">Ingrediënten uploaden</label>
+    <input id="photoIngredientScreenshots" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onchange="previewPhotoGroupedScreenshots('ingredient')" />
+    <div class="small-note">Kies 1 of 2 foto's waarop de ingrediënten duidelijk zichtbaar zijn.</div>
+    <div id="photoIngredientFileCount" class="social-file-count">Nog geen foto's gekozen</div>
+    <div id="photoIngredientPreviewGrid" class="social-preview-grid"></div>
+  </div>
+
+  <div class="social-upload-box">
+    <label for="photoStepScreenshots">Bereidingswijze uploaden</label>
+    <input id="photoStepScreenshots" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onchange="previewPhotoGroupedScreenshots('steps')" />
+    <div class="small-note">Kies 1 of 2 foto's waarop de bereidingswijze duidelijk zichtbaar is.</div>
+    <div id="photoStepFileCount" class="social-file-count">Nog geen foto's gekozen</div>
+    <div id="photoStepPreviewGrid" class="social-preview-grid"></div>
+  </div>
+
+  <button class="primary" onclick="analyzePhotoGroupedScreenshots()">✦ Foto's met AI herkennen</button>
+  <div id="photoLoading" class="loading">Foto's analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+  <div id="photoResult" class="photo-result">
+    <div class="status done">✓ Foto's gelezen</div>
+    <div class="field"><label data-t="title">Naam gerecht</label><input id="photoTitle" /></div>
+    <div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="photoIngredients"></textarea></div>
+    <div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="photoSteps"></textarea></div>
+    <div class="field"><label data-t="time">Bereidingstijd</label><input id="photoTime" placeholder="30 min" /></div>
+    <div class="field"><label data-t="visibility">Zichtbaarheid</label>
+      <div class="privacy-row">
+        <button id="photoPrivate" class="privacy-option active" onclick="setPrivacy('photo',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button>
+        <button id="photoPublic" class="privacy-option" onclick="setPrivacy('photo',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button>
+      </div>
+    </div>
+    <button class="primary" onclick="savePhotoRecipe()" data-t="saveRecipe">Recept opslaan</button>
+  </div>
+</div>
 </div></div>
 
 <div id="authOverlay" class="overlay"><div class="sheet"><div class="handle"></div><button class="text-btn" onclick="closeAuth()">← <span data-t="back">Terug</span></button><div id="authTitle" class="eyebrow">Account</div><h2 id="authHeading">Account maken</h2><div class="field"><label>E-mailadres</label><input id="authEmail" type="email" placeholder="naam@example.nl" /></div><div class="field"><label data-t="password">Wachtwoord</label><input id="authPassword" type="password" placeholder="Minimaal 8 tekens" /></div><button id="authSubmit" class="primary" onclick="submitAuth()">Account maken</button><div class="ai-box" data-t="authDemo">Dit scherm staat klaar in het prototype. Voor echte, veilige accounts koppelen we dit aan Supabase Auth.</div></div></div>
@@ -215,7 +264,7 @@ function toggleFavorite(id){let r=recipes.find(x=>x.id===id);if(!r){toast('Bewaa
 function toggleRecipePrivacy(id){const r=recipes.find(x=>x.id===id);if(!r){toast('Bewaar dit recept eerst');return}r.isPublic=!r.isPublic;persist();openRecipe(id);toast(r.isPublic?'Recept is nu openbaar':'Recept is nu privé')}
 async function shareRecipe(id){const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;const text=`${r.title} — ${r.ingredients.join(', ')}`;try{if(navigator.share){await navigator.share({title:r.title,text});}else{await navigator.clipboard.writeText(text);toast('Recept gekopieerd');}}catch(e){}}
 function openAdd(){document.getElementById('addOverlay').classList.add('show');backToMenu()}function closeOverlay(e){if(e.target.id==='addOverlay')document.getElementById('addOverlay').classList.remove('show')}
-function backToMenu(){document.getElementById('addMenu').style.display='block';['importForm','manualForm','photoForm'].forEach(id=>document.getElementById(id).classList.remove('show'));document.getElementById('importResult').classList.remove('show');document.getElementById('loading').classList.remove('show');document.getElementById('photoLoading').classList.remove('show');document.getElementById('photoResult').classList.remove('show');const ss=document.getElementById('socialScreenshots');if(ss)ss.value='';const grid=document.getElementById('socialPreviewGrid');if(grid)grid.innerHTML='';const count=document.getElementById('socialFileCount');if(count)count.textContent='Nog geen screenshots gekozen'}
+function backToMenu(){document.getElementById('addMenu').style.display='block';['importForm','manualForm','photoForm'].forEach(id=>document.getElementById(id).classList.remove('show'));document.getElementById('importResult').classList.remove('show');document.getElementById('loading').classList.remove('show');document.getElementById('photoLoading').classList.remove('show');document.getElementById('photoResult').classList.remove('show');['photoIngredientScreenshots','photoStepScreenshots'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});['photoIngredientPreviewGrid','photoStepPreviewGrid'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});['photoIngredientFileCount','photoStepFileCount'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent="Nog geen foto's gekozen"});['ingredientScreenshots','stepScreenshots'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});['ingredientPreviewGrid','stepPreviewGrid'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});['ingredientFileCount','stepFileCount'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent="Nog geen foto's gekozen"})}
 function showImport(){document.getElementById('addMenu').style.display='none';document.getElementById('importForm').classList.add('show')}function showManual(){document.getElementById('addMenu').style.display='none';document.getElementById('manualForm').classList.add('show')}function showPhoto(){document.getElementById('addMenu').style.display='none';document.getElementById('photoForm').classList.add('show')}
 function setPrivacy(prefix,isPrivate){if(prefix==='ai')aiPrivate=isPrivate;else if(prefix==='photo')photoPrivate=isPrivate;else manualPrivate=isPrivate;document.getElementById(prefix+'Private').classList.toggle('active',isPrivate);document.getElementById(prefix+'Public').classList.toggle('active',!isPrivate)}
 function saveImported(){const title=document.getElementById('aiTitle').value.trim(),ing=lines('aiIngredients'),steps=lines('aiSteps'),url=document.getElementById('importUrl').value.trim();if(!title||!ing.length||!steps.length){toast('Vul de ontbrekende gegevens aan.');return}recipes.unshift({id:'r'+Date.now(),title,category:'AI import',time:document.getElementById('aiTime').value||'—',people:'2',favorite:false,tone:'dark',source:url.includes('instagram')?'Instagram':url.includes('tiktok')?'TikTok':'Website',url,ingredients:ing,steps,isPublic:!aiPrivate,author:'U'});persist();document.getElementById('addOverlay').classList.remove('show');showScreen('home');toast('Recept opgeslagen')}
@@ -406,7 +455,7 @@ async function saveManual(){
 async function saveImported(){
   const title=document.getElementById('aiTitle').value.trim(),ing=lines('aiIngredients'),steps=lines('aiSteps');
   if(!title||!ing.length||!steps.length){toast('Controleer naam, ingrediënten en bereidingswijze.');return}
-  const firstFile=document.getElementById('socialScreenshots')?.files?.[0];
+  const firstFile=document.getElementById('ingredientScreenshots')?.files?.[0]||document.getElementById('stepScreenshots')?.files?.[0];
   try{
     const imageUrl=firstFile?await uploadRecipeImage(firstFile):'';
     await insertRecipeRecord({title,category:'Social media',time:document.getElementById('aiTime').value,ingredients:ing,steps,isPublic:!aiPrivate,sourceType:'other',imageUrl});
@@ -427,7 +476,7 @@ async function uploadRecipeImage(file){
 async function savePhotoRecipe(){
   const title=document.getElementById('photoTitle').value.trim(),ing=lines('photoIngredients'),steps=lines('photoSteps');
   if(!title||!ing.length||!steps.length){toast('Controleer naam, ingrediënten en bereidingswijze.');return}
-  const f=document.getElementById('photoInput').files?.[0];
+  const f=document.getElementById('photoIngredientScreenshots')?.files?.[0]||document.getElementById('photoStepScreenshots')?.files?.[0];
   try{const imageUrl=f?await uploadRecipeImage(f):'';await insertRecipeRecord({title,category:'Uit kookboek',time:document.getElementById('photoTime').value,ingredients:ing,steps,isPublic:!photoPrivate,sourceType:'photo',imageUrl});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept vanaf foto opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
 }
 async function toggleFavorite(id){
@@ -478,39 +527,127 @@ async function invokeAi(payload){
   }
   throw lastError||new Error('AI is tijdelijk niet beschikbaar.');
 }
-async function analyzePhoto(){
-  const f=document.getElementById('photoInput').files?.[0];if(!f){toast('Kies of maak eerst een foto.');return}
-  document.getElementById('photoLoading').classList.add('show');document.getElementById('photoResult').classList.remove('show');
-  try{const dataUrl=await fileToDataUrl(f);const rec=await invokeAi({mode:'photo',image_data_url:dataUrl,language:currentLang});applyAiRecipe(rec,'photo');document.getElementById('photoResult').classList.add('show');toast('Foto met AI herkend. Controleer het resultaat.')}catch(e){console.error(e);toast(e.message||'Foto analyseren is niet gelukt.')}finally{document.getElementById('photoLoading').classList.remove('show')}
-}
+const photoGroupedPreviewUrls={ingredient:[],steps:[]};
 
-let socialPreviewUrls=[];
+function previewPhotoGroupedScreenshots(type){
+  const ingredientMode=type==='ingredient';
+  const input=document.getElementById(ingredientMode?'photoIngredientScreenshots':'photoStepScreenshots');
+  let files=Array.from(input?.files||[]);
 
-function previewSocialScreenshots(event){
-  const input=event.target;
-  let files=Array.from(input.files||[]);
-  if(files.length>3){
-    toast('U kunt maximaal 3 screenshots toevoegen.');
+  if(files.length>2){
+    toast("U kunt per onderdeel maximaal 2 foto's toevoegen.");
     const dt=new DataTransfer();
-    files.slice(0,3).forEach(f=>dt.items.add(f));
+    files.slice(0,2).forEach(f=>dt.items.add(f));
     input.files=dt.files;
-    files=files.slice(0,3);
+    files=files.slice(0,2);
   }
 
-  socialPreviewUrls.forEach(u=>URL.revokeObjectURL(u));
-  socialPreviewUrls=[];
-  const grid=document.getElementById('socialPreviewGrid');
+  const key=ingredientMode?'ingredient':'steps';
+  photoGroupedPreviewUrls[key].forEach(u=>URL.revokeObjectURL(u));
+  photoGroupedPreviewUrls[key]=[];
+
+  const grid=document.getElementById(ingredientMode?'photoIngredientPreviewGrid':'photoStepPreviewGrid');
+  const count=document.getElementById(ingredientMode?'photoIngredientFileCount':'photoStepFileCount');
   grid.innerHTML='';
+
   files.forEach((file,i)=>{
     const url=URL.createObjectURL(file);
-    socialPreviewUrls.push(url);
+    photoGroupedPreviewUrls[key].push(url);
     const item=document.createElement('div');
     item.className='social-preview-item';
-    item.innerHTML=`<img src="${url}" alt="Screenshot ${i+1}"><span>${i+1}</span>`;
+    item.innerHTML=`<img src="${url}" alt="Foto ${i+1}"><span>${i+1}</span>`;
     grid.appendChild(item);
   });
-  document.getElementById('socialFileCount').textContent=
-    files.length?`${files.length} van maximaal 3 screenshots gekozen`:'Nog geen screenshots gekozen';
+
+  count.textContent=files.length
+    ? `${files.length} van maximaal 2 foto's gekozen`
+    : `Nog geen foto's gekozen`;
+}
+
+async function analyzePhotoGroupedScreenshots(){
+  const ingredientFiles=Array.from(document.getElementById('photoIngredientScreenshots')?.files||[]);
+  const stepFiles=Array.from(document.getElementById('photoStepScreenshots')?.files||[]);
+
+  if(!ingredientFiles.length && !stepFiles.length){
+    toast('Upload eerst minimaal één foto.');
+    return;
+  }
+
+  document.getElementById('photoLoading').classList.add('show');
+  document.getElementById('photoResult').classList.remove('show');
+
+  try{
+    const ingredientResult=ingredientFiles.length
+      ? await analyzePhotoGroup(ingredientFiles,'ingredients')
+      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+
+    const stepResult=stepFiles.length
+      ? await analyzePhotoGroup(stepFiles,'steps')
+      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+
+    if((ingredientResult.successCount+stepResult.successCount)===0){
+      throw new Error("De foto's konden op dit moment niet worden gelezen. Probeer het later opnieuw.");
+    }
+
+    document.getElementById('photoTitle').value=ingredientResult.title||stepResult.title||'';
+    document.getElementById('photoIngredients').value=(ingredientResult.ingredients||[]).join('
+');
+    document.getElementById('photoSteps').value=(stepResult.steps||[]).join('
+');
+
+    const totalMinutes=Math.max(ingredientResult.totalMinutes||0,stepResult.totalMinutes||0);
+    document.getElementById('photoTime').value=totalMinutes?totalMinutes+' min':'';
+    document.getElementById('photoResult').classList.add('show');
+
+    toast('Foto’s gelezen. Controleer het resultaat.');
+  }catch(e){
+    console.error(e);
+    toast(e.message||"Foto's analyseren is niet gelukt.");
+  }finally{
+    document.getElementById('photoLoading').classList.remove('show');
+  }
+}
+
+
+const groupedPreviewUrls={ingredient:[],steps:[]};
+
+function limitFilesToTwo(input){
+  let files=Array.from(input.files||[]);
+  if(files.length>2){
+    toast("U kunt per onderdeel maximaal 2 foto's toevoegen.");
+    const dt=new DataTransfer();
+    files.slice(0,2).forEach(f=>dt.items.add(f));
+    input.files=dt.files;
+    files=files.slice(0,2);
+  }
+  return files;
+}
+
+function previewGroupedScreenshots(type){
+  const ingredientMode=type==='ingredient';
+  const input=document.getElementById(ingredientMode?'ingredientScreenshots':'stepScreenshots');
+  const files=limitFilesToTwo(input);
+  const key=ingredientMode?'ingredient':'steps';
+
+  groupedPreviewUrls[key].forEach(u=>URL.revokeObjectURL(u));
+  groupedPreviewUrls[key]=[];
+
+  const grid=document.getElementById(ingredientMode?'ingredientPreviewGrid':'stepPreviewGrid');
+  const count=document.getElementById(ingredientMode?'ingredientFileCount':'stepFileCount');
+  grid.innerHTML='';
+
+  files.forEach((file,i)=>{
+    const url=URL.createObjectURL(file);
+    groupedPreviewUrls[key].push(url);
+    const item=document.createElement('div');
+    item.className='social-preview-item';
+    item.innerHTML=`<img src="${url}" alt="Foto ${i+1}"><span>${i+1}</span>`;
+    grid.appendChild(item);
+  });
+
+  count.textContent=files.length
+    ? `${files.length} van maximaal 2 foto's gekozen`
+    : `Nog geen foto's gekozen`;
 }
 
 function cleanRecipeLine(value){
@@ -564,52 +701,87 @@ function stepLinesFromAi(rec){
   return splitRecipeLines(rec?.steps||[]);
 }
 
-async function analyzeSocialScreenshots(){
-  const files=Array.from(document.getElementById('socialScreenshots')?.files||[]);
-  if(!files.length){toast('Kies eerst minimaal 1 screenshot.');return}
-  if(files.length>3){toast('U kunt maximaal 3 screenshots toevoegen.');return}
-
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('importResult').classList.remove('show');
-
+async function analyzePhotoGroup(files, wanted){
   let title='';
   let ingredients=[];
   let steps=[];
   let totalMinutes=0;
   let successCount=0;
 
-  try{
-    for(let i=0;i<files.length;i++){
-      const dataUrl=await fileToDataUrl(files[i]);
-      try{
-        const rec=await invokeAi({mode:'photo',image_data_url:dataUrl,language:currentLang});
-        successCount++;
-        if(!title && rec?.title) title=rec.title;
+  for(let i=0;i<files.length;i++){
+    const dataUrl=await fileToDataUrl(files[i]);
+    try{
+      const rec=await invokeAi({mode:'photo',image_data_url:dataUrl,language:currentLang});
+      successCount++;
+      if(!title && rec?.title) title=rec.title;
+
+      if(wanted==='ingredients'){
         ingredients=mergeUniqueRecipeLines(ingredients,ingredientLinesFromAi(rec));
+      }else{
         steps=mergeUniqueRecipeLines(steps,stepLinesFromAi(rec));
-        const mins=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
-        if(mins>totalMinutes) totalMinutes=mins;
-      }catch(err){
-        console.error('Screenshot '+(i+1)+' kon niet worden gelezen:',err);
       }
+
+      const mins=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
+      if(mins>totalMinutes) totalMinutes=mins;
+    }catch(err){
+      console.error(`${wanted} foto ${i+1} kon niet worden gelezen:`,err);
+    }
+  }
+
+  return {title,ingredients,steps,totalMinutes,successCount};
+}
+
+async function analyzeGroupedScreenshots(){
+  const ingredientFiles=Array.from(document.getElementById('ingredientScreenshots')?.files||[]);
+  const stepFiles=Array.from(document.getElementById('stepScreenshots')?.files||[]);
+
+  if(!ingredientFiles.length && !stepFiles.length){
+    toast('Upload eerst minimaal één foto.');
+    return;
+  }
+  if(ingredientFiles.length>2 || stepFiles.length>2){
+    toast("U kunt per onderdeel maximaal 2 foto's toevoegen.");
+    return;
+  }
+
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('importResult').classList.remove('show');
+
+  try{
+    const ingredientResult=ingredientFiles.length
+      ? await analyzePhotoGroup(ingredientFiles,'ingredients')
+      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+
+    const stepResult=stepFiles.length
+      ? await analyzePhotoGroup(stepFiles,'steps')
+      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+
+    const totalSuccess=ingredientResult.successCount+stepResult.successCount;
+    if(!totalSuccess){
+      throw new Error("De foto's konden op dit moment niet worden gelezen. Probeer het later opnieuw.");
     }
 
-    if(!successCount) throw new Error('De screenshots konden op dit moment niet door AI worden gelezen. Probeer het over een paar minuten opnieuw.');
+    const title=ingredientResult.title||stepResult.title||'';
+    const ingredients=ingredientResult.ingredients||[];
+    const steps=stepResult.steps||[];
+    const totalMinutes=Math.max(ingredientResult.totalMinutes||0,stepResult.totalMinutes||0);
 
-    document.getElementById('aiTitle').value=title||'';
+    document.getElementById('aiTitle').value=title;
     document.getElementById('aiIngredients').value=ingredients.join('\n');
     document.getElementById('aiSteps').value=steps.join('\n');
     document.getElementById('aiTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('importResult').classList.add('show');
 
-    if(successCount<files.length){
-      toast(`${successCount} van ${files.length} screenshots zijn gelezen. Controleer het resultaat.`);
+    if(!ingredientFiles.length){
+      toast('Bereidingswijze gelezen. Vul de ingrediënten eventueel handmatig aan.');
+    }else if(!stepFiles.length){
+      toast('Ingrediënten gelezen. Vul de bereidingswijze eventueel handmatig aan.');
     }else{
-      toast('Alle screenshots zijn gelezen en netjes per regel gezet. Controleer het recept.');
+      toast('Ingrediënten en bereidingswijze zijn gelezen. Controleer het resultaat.');
     }
   }catch(e){
     console.error(e);
-    toast(e.message||'Screenshots analyseren is niet gelukt.');
+    toast(e.message||'Foto’s analyseren is niet gelukt.');
   }finally{
     document.getElementById('loading').classList.remove('show');
   }
