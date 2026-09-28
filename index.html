@@ -216,6 +216,16 @@ img{max-width:100%}
 #installCard .primary,#installCard .secondary{width:100%}
 @media(max-width:699px){.app-update-bar{bottom:calc(86px + env(safe-area-inset-bottom));left:12px;right:12px;transform:none;width:auto}.app-update-bar button{padding:9px 11px}.app-update-bar span{font-size:11px}}
 
+
+.detail-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--paper);position:relative;z-index:3;border-bottom:1px solid rgba(112,69,36,.06)}
+.detail-toolbar-actions{display:flex;gap:8px}
+#detail .detail-hero{margin-top:0}
+@media(max-width:699px){
+  .detail-toolbar{padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--paper);position:relative}
+  .detail-toolbar .iconbtn{background:var(--white);box-shadow:0 5px 14px rgba(72,42,24,.10)}
+  #detail .detail-hero{margin-top:0}
+}
+
 </style>
 </head>
 <body>
@@ -285,8 +295,14 @@ img{max-width:100%}
   </section>
 
   <section id="detail" class="screen">
-    <div class="topbar" style="background:transparent;position:absolute;width:100%;"><button class="iconbtn" onclick="historyBack()">←</button><div></div></div>
-    <div class="detail-hero"><div class="hero-actions"><div></div><div class="floating-actions"><button id="detailHeart" class="hero-btn" onclick="toggleFavorite(currentId)">♡</button><button class="hero-btn" onclick="shareRecipe(currentId)">↗</button></div></div></div>
+    <div class="detail-toolbar">
+      <button class="iconbtn" aria-label="Terug" onclick="historyBack()">←</button>
+      <div class="detail-toolbar-actions">
+        <button id="detailHeart" class="iconbtn" aria-label="Favoriet" onclick="toggleFavorite(currentId)">♡</button>
+        <button class="iconbtn" aria-label="Delen" onclick="shareRecipe(currentId)">↗</button>
+      </div>
+    </div>
+    <div class="detail-hero"></div>
     <div id="detailBody"></div>
   </section>
 
