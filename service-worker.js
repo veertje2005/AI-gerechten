@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smaakboek-v26';
+const CACHE_NAME = 'smaakboek-v27';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -11,11 +11,11 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -30,19 +30,28 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  // Don't cache API / Supabase requests.
   const url = new URL(req.url);
   if (url.hostname.includes('supabase.co') || url.pathname.includes('/functions/')) return;
 
+  // Navigaties: probeer eerst het netwerk zodat nieuwe appversies snel zichtbaar worden.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res.ok) caches.open(CACHE_NAME).then(cache => cache.put('/index.html', res.clone()));
+          return res;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(req)
-      .then(res => {
-        const copy = res.clone();
-        if (res.ok && url.origin === self.location.origin) {
-          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
-        }
-        return res;
-      })
-      .catch(() => caches.match(req).then(hit => hit || caches.match('/index.html')))
+    caches.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res.ok && url.origin === self.location.origin) {
+        caches.open(CACHE_NAME).then(cache => cache.put(req, res.clone()));
+      }
+      return res;
+    }))
   );
 });

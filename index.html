@@ -210,6 +210,12 @@ img{max-width:100%}
 .gallery-empty{padding:16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:13px;text-align:center}
 @media(max-width:699px){.recipe-photo-gallery{margin-left:16px;margin-right:16px;padding:14px}.gallery-photo{flex-basis:92px;height:92px}.photo-upload-row{display:block}.photo-upload-row input[type=file]{width:100%;min-width:0;margin-bottom:8px}.photo-upload-row .small-btn{width:100%}}
 
+
+.app-update-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;width:min(440px,calc(100% - 24px));z-index:60;background:var(--ink);color:#fff;border-radius:18px;padding:12px 12px 12px 14px;box-shadow:0 16px 36px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.app-update-bar strong{display:block;font-size:14px}.app-update-bar span{display:block;font-size:12px;opacity:.8;margin-top:2px;line-height:1.35}.app-update-bar button{border:0;background:#fff;color:var(--brown);font-weight:800;border-radius:999px;padding:9px 13px;white-space:nowrap}
+#installCard .primary,#installCard .secondary{width:100%}
+@media(max-width:699px){.app-update-bar{bottom:calc(86px + env(safe-area-inset-bottom));left:12px;right:12px;transform:none;width:auto}.app-update-bar button{padding:9px 11px}.app-update-bar span{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -265,6 +271,14 @@ img{max-width:100%}
         <button id="saveProfileBtn" class="primary" onclick="saveProfile()">Profiel opslaan</button>
         <button class="secondary" onclick="logout()" data-t="logout">Uitloggen</button>
       </div>
+
+      <div class="profile-card" id="installCard">
+        <h2>Installeer Smaakboek</h2>
+        <p class="sub" id="installExplain">Zet Smaakboek op uw beginscherm en open het voortaan als een app.</p>
+        <button id="installAppButton" class="primary" type="button" onclick="installSmaakboek()">Installeer Smaakboek</button>
+        <button id="iosInstallHelpButton" class="secondary" type="button" onclick="showIosInstallHelp()" style="display:none">Hoe installeer ik op iPhone?</button>
+        <div id="installedMessage" class="ai-box" style="display:none;margin-top:10px">Smaakboek is al als app geïnstalleerd op dit apparaat.</div>
+      </div>
       <div class="profile-card"><h2 data-t="settings">Instellingen</h2><div class="setting"><div><label data-t="language">Taal</label><small data-t="languageExplain">Wijzig de taal van de app</small></div><select id="languageSelect" onchange="setLanguage(this.value)"><option value="nl">Nederlands</option><option value="en">English</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div><div class="setting"><div><label data-t="defaultPrivate">Standaard privé</label><small data-t="privacyExplain">Nieuwe recepten zijn alleen voor u zichtbaar</small></div><button id="defaultPrivacy" class="toggle on" onclick="toggleDefaultPrivacy()"></button></div></div>
     </div>
   </section>
@@ -275,6 +289,11 @@ img{max-width:100%}
     <div id="detailBody"></div>
   </section>
 
+
+  <div id="appUpdateBar" class="app-update-bar" style="display:none">
+    <div><strong>Nieuwe versie beschikbaar</strong><span>Werk Smaakboek bij voor de nieuwste verbeteringen.</span></div>
+    <button type="button" onclick="applyAppUpdate()">Bijwerken</button>
+  </div>
   <nav class="bottom">
     <button class="nav active" data-screen="home" onclick="showScreen('home')"><span class="ico">⌂</span><span data-t="home">Home</span></button>
     <button class="nav" data-screen="discover" onclick="showScreen('discover')"><span class="ico">◎</span><span data-t="discover">Ontdek</span></button>
@@ -384,6 +403,27 @@ img{max-width:100%}
 
 <div id="authOverlay" class="overlay"><div class="sheet"><div class="handle"></div><button class="text-btn" onclick="closeAuth()">← <span data-t="back">Terug</span></button><div id="authTitle" class="eyebrow">Account</div><h2 id="authHeading">Account maken</h2><div class="field"><label>E-mailadres</label><input id="authEmail" type="email" placeholder="naam@example.nl" /></div><div class="field"><label data-t="password">Wachtwoord</label><input id="authPassword" type="password" placeholder="Minimaal 8 tekens" /></div><button id="authSubmit" class="primary" onclick="submitAuth()">Account maken</button><div class="ai-box" data-t="authDemo">Dit scherm staat klaar in het prototype. Voor echte, veilige accounts koppelen we dit aan Supabase Auth.</div></div></div>
 <div id="toast" class="toast"></div>
+<div id="iosInstallOverlay" class="overlay" onclick="if(event.target===this)closeIosInstallHelp()">
+  <div class="sheet" style="max-width:520px">
+    <div class="handle"></div>
+    <button class="text-btn" onclick="closeIosInstallHelp()">← Terug</button>
+    <div class="eyebrow">iPhone / iPad</div>
+    <h2>Smaakboek op uw beginscherm</h2>
+    <div class="ai-box">
+      <strong>1. Open Smaakboek in Safari</strong><br>
+      <span>Gebruik Safari, niet de ingebouwde browser van een andere app.</span>
+    </div>
+    <div class="ai-box" style="margin-top:10px">
+      <strong>2. Tik op de deelknop</strong><br>
+      <span>Dit is het vierkantje met het pijltje omhoog.</span>
+    </div>
+    <div class="ai-box" style="margin-top:10px">
+      <strong>3. Kies ‘Zet op beginscherm’</strong><br>
+      <span>Bevestig daarna met ‘Voeg toe’.</span>
+    </div>
+    <button class="primary" onclick="closeIosInstallHelp()">Begrepen</button>
+  </div>
+</div>
 <script>
 const translations={
 nl:{personalCookbook:'Uw persoonlijke kookboek',whatCook:'Wat gaan we vandaag maken?',search:'Zoek op gerecht of ingrediënt...',savedForYou:'Voor u bewaard',categories:'Categorieën',all:'Alles',quick:'Snel',healthy:'Gezond',baking:'Bakken',myRecipes:'Mijn recepten',viewAll:'Bekijk alles',recipes:'Recepten',discover:'Ontdek',community:'Van de community',findNew:'Vind nieuwe favorieten',discoverSearch:'Zoek openbare recepten...',favorites:'Favorieten',profile:'Profiel',home:'Home',add:'Toevoegen',account:'Account',saveEverywhere:'Bewaar uw recepten overal',accountExplain:'Maak een account met e-mailadres en wachtwoord. Zo kunt u later op meerdere apparaten bij dezelfde recepten.',createAccount:'Account maken',login:'Inloggen',logout:'Uitloggen',settings:'Instellingen',language:'Taal',languageExplain:'Wijzig de taal van de app',defaultPrivate:'Standaard privé',privacyExplain:'Nieuwe recepten zijn alleen voor u zichtbaar',addRecipe:'Recept toevoegen',howAdd:'Hoe wilt u toevoegen?',addExplain:'Voeg recepten toe via screenshots, een foto of handmatig.',socialImport:'Recept van social media',socialImportExplain:'Upload maximaal 3 screenshots. Smaakboek haalt daar het recept uit.',manual:'Handmatig toevoegen',manualExplain:'Voeg zelf naam, ingrediënten en bereidingswijze toe.',photo:'Vanaf foto',photoExplain:'Maak van een foto van een recept een digitaal recept.',back:'Terug',importSocial:'Recept van social media toevoegen',stepShare:'Deel of kopieer de link',stepShareExplain:'Tik in TikTok, Instagram of Facebook op Delen → Link kopiëren.',stepPaste:'Plak de link hieronder',stepPasteExplain:'Wij herkennen automatisch van welk platform de link komt.',stepCheck:'Controleer het AI-resultaat',stepCheckExplain:'Controleer het resultaat en vul ontbrekende bereidingsstappen zelf aan voordat u opslaat.',recipeLink:'Link naar recept of video',paste:'Plakken',analyzeAI:'Analyseren met AI',analyzing:'Video en tekst analyseren',sourceFound:'Bron herkend',ingredientsFound:'Ingrediënten opgesteld',stepsFound:'Bereidingsstappen opgesteld',title:'Naam gerecht',ingredients:'Ingrediënten — één per regel',preparation:'Bereidingswijze — één stap per regel',time:'Bereidingstijd',visibility:'Zichtbaarheid',private:'Privé',privateExplain:'Alleen zichtbaar voor u',public:'Openbaar',publicExplain:'Anderen kunnen dit recept vinden',saveRecipe:'Recept opslaan',newRecipe:'Nieuw recept',category:'Categorie',photoRecipe:'Recept vanaf foto',photoAiExplain:'AI kan de tekst uit een foto halen en omzetten naar ingrediënten en bereidingsstappen.',choosePhoto:'Kies een foto',recognizePhoto:'Foto herkennen',password:'Wachtwoord',screenshotHelp:'U kunt ook een screenshot uit de video toevoegen als de bereidingswijze niet volledig is gevonden.',screenshotAdded:'Screenshot met AI gelezen. Controleer het resultaat.',authDemo:'Dit scherm staat klaar in het prototype. Voor echte, veilige accounts koppelen we dit aan Supabase Auth.'},
@@ -1222,6 +1262,98 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+
+let deferredInstallPrompt=null;
+let waitingServiceWorker=null;
+
+function isStandaloneApp(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function isIosDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function refreshInstallUi(){
+  const installBtn=document.getElementById('installAppButton');
+  const iosBtn=document.getElementById('iosInstallHelpButton');
+  const installed=document.getElementById('installedMessage');
+  const explain=document.getElementById('installExplain');
+  if(!installBtn||!iosBtn||!installed)return;
+
+  if(isStandaloneApp()){
+    installBtn.style.display='none';
+    iosBtn.style.display='none';
+    installed.style.display='block';
+    if(explain)explain.textContent='Smaakboek is op dit apparaat geïnstalleerd.';
+    return;
+  }
+  installed.style.display='none';
+
+  if(deferredInstallPrompt){
+    installBtn.style.display='block';
+    iosBtn.style.display='none';
+    if(explain)explain.textContent='Installeer Smaakboek en open het voortaan direct vanaf uw beginscherm.';
+  }else if(isIosDevice()){
+    installBtn.style.display='none';
+    iosBtn.style.display='block';
+    if(explain)explain.textContent='Op iPhone installeert u Smaakboek via Safari → Delen → Zet op beginscherm.';
+  }else{
+    installBtn.style.display='block';
+    installBtn.textContent='Installatie controleren';
+    iosBtn.style.display='none';
+    if(explain)explain.textContent='Als uw browser installatie ondersteunt, verschijnt hier de installatieoptie.';
+  }
+}
+
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  refreshInstallUi();
+});
+
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  refreshInstallUi();
+  toast('Smaakboek is geïnstalleerd.');
+});
+
+async function installSmaakboek(){
+  if(isStandaloneApp()){
+    refreshInstallUi();
+    return;
+  }
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const choice=await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    refreshInstallUi();
+    if(choice?.outcome==='accepted')toast('Smaakboek wordt geïnstalleerd.');
+    return;
+  }
+  if(isIosDevice()){
+    showIosInstallHelp();
+    return;
+  }
+  toast('Installeren is in deze browser nog niet beschikbaar. Open Smaakboek in Chrome of Safari.');
+}
+
+function showIosInstallHelp(){document.getElementById('iosInstallOverlay')?.classList.add('show')}
+function closeIosInstallHelp(){document.getElementById('iosInstallOverlay')?.classList.remove('show')}
+
+function showAppUpdate(worker){
+  waitingServiceWorker=worker;
+  const bar=document.getElementById('appUpdateBar');
+  if(bar)bar.style.display='flex';
+}
+function applyAppUpdate(){
+  if(waitingServiceWorker){
+    waitingServiceWorker.postMessage({type:'SKIP_WAITING'});
+  }else{
+    location.reload();
+  }
+}
+
+window.addEventListener('DOMContentLoaded',refreshInstallUi);
+
 sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(()=>{loadOnlineData();updateAiUsage();},0)});
 loadOnlineData();
 </script>
@@ -1229,10 +1361,37 @@ loadOnlineData();
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').catch(err => {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        showAppUpdate(registration.waiting);
+      }
+
+      registration.addEventListener('updatefound', () => {
+        const worker = registration.installing;
+        if (!worker) return;
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            showAppUpdate(worker);
+          }
+        });
+      });
+
+      // Controleer bij elk app-bezoek of er een nieuwere versie is.
+      registration.update().catch(()=>{});
+      setInterval(() => registration.update().catch(()=>{}), 60 * 60 * 1000);
+
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+    } catch (err) {
       console.warn('Service worker kon niet worden geregistreerd:', err);
-    });
+    }
   });
 }
 </script>
