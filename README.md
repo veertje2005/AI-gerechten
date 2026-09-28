@@ -2,7 +2,7 @@
 
 Smaakboek is een persoonlijke receptenapp met:
 - eigen recepten
-- AI-import vanaf foto's en receptlinks
+- AI-import vanaf foto's en maximaal 3 screenshots van social media
 - openbare recepten ontdekken
 - favorieten
 - profiel en meerdere talen
