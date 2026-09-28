@@ -277,6 +277,7 @@ img{max-width:100%}
         <p class="sub" id="installExplain">Zet Smaakboek op uw beginscherm en open het voortaan als een app.</p>
         <button id="installAppButton" class="primary" type="button" onclick="installSmaakboek()">Installeer Smaakboek</button>
         <button id="iosInstallHelpButton" class="secondary" type="button" onclick="showIosInstallHelp()" style="display:none">Hoe installeer ik op iPhone?</button>
+        <button id="androidInstallHelpButton" class="secondary" type="button" onclick="showAndroidInstallHelp()" style="display:none">Hoe installeer ik op Android?</button>
         <div id="installedMessage" class="ai-box" style="display:none;margin-top:10px">Smaakboek is al als app geïnstalleerd op dit apparaat.</div>
       </div>
       <div class="profile-card"><h2 data-t="settings">Instellingen</h2><div class="setting"><div><label data-t="language">Taal</label><small data-t="languageExplain">Wijzig de taal van de app</small></div><select id="languageSelect" onchange="setLanguage(this.value)"><option value="nl">Nederlands</option><option value="en">English</option><option value="de">Deutsch</option><option value="fr">Français</option></select></div><div class="setting"><div><label data-t="defaultPrivate">Standaard privé</label><small data-t="privacyExplain">Nieuwe recepten zijn alleen voor u zichtbaar</small></div><button id="defaultPrivacy" class="toggle on" onclick="toggleDefaultPrivacy()"></button></div></div>
@@ -558,7 +559,32 @@ async function addRecipePhoto(recipeId){
   }catch(e){console.error(e);toast(e.message||'Foto toevoegen is niet gelukt.');}
 }
 
-function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${Number(r.people)>0?esc(r.people)+' personen':'Aantal personen niet ingesteld'}</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button><button class="sharebtn delete-recipe-btn" onclick="deleteRecipe('${r.id}')">🗑 Verwijderen</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div>${recipeGalleryHtml(r)}<div class="block"><h2>Ingrediënten</h2>${Number(r.people)>0?`<div class="servings-control"><span>Hoeveel eten mee?</span><button onclick="changeServingCount('${r.id}',-1)">−</button><strong id="servingCount" data-value="${Number(r.people)}">${esc(r.people)} personen</strong><button onclick="changeServingCount('${r.id}',1)">＋</button></div>`:''}<div id="scaledIngredients">${renderScaledIngredients(r,Number(r.people)||1)}</div></div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
+function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${Number(r.people)>0?esc(r.people)+' personen':'Aantal personen niet ingesteld'}</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div>
+<div id="androidInstallOverlay" class="overlay" onclick="if(event.target===this)closeAndroidInstallHelp()">
+  <div class="sheet" style="max-width:520px">
+    <div class="handle"></div>
+    <button class="text-btn" onclick="closeAndroidInstallHelp()">← Terug</button>
+    <div class="eyebrow">Android</div>
+    <h2>Smaakboek installeren op Android</h2>
+    <div class="ai-box">
+      <strong>1. Open Smaakboek in Chrome</strong><br>
+      <span>Gebruik bij voorkeur Google Chrome op uw Android-telefoon.</span>
+    </div>
+    <div class="ai-box" style="margin-top:10px">
+      <strong>2. Tik op de drie puntjes</strong><br>
+      <span>Deze staan meestal rechtsboven in Chrome.</span>
+    </div>
+    <div class="ai-box" style="margin-top:10px">
+      <strong>3. Kies ‘App installeren’</strong><br>
+      <span>Bij sommige telefoons heet dit ‘Toevoegen aan startscherm’.</span>
+    </div>
+    <div class="ai-box" style="margin-top:10px">
+      <strong>4. Bevestig de installatie</strong><br>
+      <span>Smaakboek verschijnt daarna met het eigen icoon op uw startscherm.</span>
+    </div>
+    <button class="primary" onclick="closeAndroidInstallHelp()">Begrepen</button>
+  </div>
+</div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button><button class="sharebtn delete-recipe-btn" onclick="deleteRecipe('${r.id}')">🗑 Verwijderen</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div>${recipeGalleryHtml(r)}<div class="block"><h2>Ingrediënten</h2>${Number(r.people)>0?`<div class="servings-control"><span>Hoeveel eten mee?</span><button onclick="changeServingCount('${r.id}',-1)">−</button><strong id="servingCount" data-value="${Number(r.people)}">${esc(r.people)} personen</strong><button onclick="changeServingCount('${r.id}',1)">＋</button></div>`:''}<div id="scaledIngredients">${renderScaledIngredients(r,Number(r.people)||1)}</div></div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
 function openCommunity(id){openRecipe(id)}
 function saveCommunity(id){const r=community.find(x=>x.id===id);if(!r)return;recipes.unshift({...r,id:'r'+Date.now(),favorite:false,author:'U',isPublic:false,source:'Community'});persist();renderAll();toast('Recept bewaard in uw Smaakboek')}
 function historyBack(){showScreen(previous==='detail'?'home':previous)}
@@ -1275,13 +1301,15 @@ function isIosDevice(){
 function refreshInstallUi(){
   const installBtn=document.getElementById('installAppButton');
   const iosBtn=document.getElementById('iosInstallHelpButton');
+  const androidBtn=document.getElementById('androidInstallHelpButton');
   const installed=document.getElementById('installedMessage');
   const explain=document.getElementById('installExplain');
-  if(!installBtn||!iosBtn||!installed)return;
+  if(!installBtn||!iosBtn||!androidBtn||!installed)return;
 
   if(isStandaloneApp()){
     installBtn.style.display='none';
     iosBtn.style.display='none';
+    androidBtn.style.display='none';
     installed.style.display='block';
     if(explain)explain.textContent='Smaakboek is op dit apparaat geïnstalleerd.';
     return;
@@ -1291,15 +1319,24 @@ function refreshInstallUi(){
   if(deferredInstallPrompt){
     installBtn.style.display='block';
     iosBtn.style.display='none';
+    androidBtn.style.display='none';
     if(explain)explain.textContent='Installeer Smaakboek en open het voortaan direct vanaf uw beginscherm.';
   }else if(isIosDevice()){
     installBtn.style.display='none';
     iosBtn.style.display='block';
+    androidBtn.style.display='none';
     if(explain)explain.textContent='Op iPhone installeert u Smaakboek via Safari → Delen → Zet op beginscherm.';
+  }else if(/android/i.test(navigator.userAgent)){
+    installBtn.style.display='block';
+    installBtn.textContent='Installeer Smaakboek';
+    iosBtn.style.display='none';
+    androidBtn.style.display='block';
+    if(explain)explain.textContent='Op Android kunt u Smaakboek installeren via Chrome. Gebruik de knop hieronder of open de installatiehulp.';
   }else{
     installBtn.style.display='block';
     installBtn.textContent='Installatie controleren';
     iosBtn.style.display='none';
+    androidBtn.style.display='none';
     if(explain)explain.textContent='Als uw browser installatie ondersteunt, verschijnt hier de installatieoptie.';
   }
 }
@@ -1338,6 +1375,8 @@ async function installSmaakboek(){
 
 function showIosInstallHelp(){document.getElementById('iosInstallOverlay')?.classList.add('show')}
 function closeIosInstallHelp(){document.getElementById('iosInstallOverlay')?.classList.remove('show')}
+function showAndroidInstallHelp(){document.getElementById('androidInstallOverlay')?.classList.add('show')}
+function closeAndroidInstallHelp(){document.getElementById('androidInstallOverlay')?.classList.remove('show')}
 
 function showAppUpdate(worker){
   waitingServiceWorker=worker;
