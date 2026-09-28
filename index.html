@@ -49,12 +49,22 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 .social-preview-item span{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.68);color:#fff;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:700}
 .social-file-count{margin-top:8px;font-size:12px;font-weight:700;color:var(--brown)}
 
+
+.brand-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-logo{width:40px;height:40px;border-radius:12px;object-fit:cover;box-shadow:0 5px 14px rgba(72,42,24,.12);flex:0 0 auto}
+.servings-field{display:flex;align-items:center;gap:10px}
+.servings-field input{max-width:120px}
+.servings-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}
+.servings-control{display:flex;align-items:center;gap:10px;margin:12px 0 18px;padding:12px 14px;border:1px solid rgba(112,69,36,.12);border-radius:16px;background:var(--cream)}
+.servings-control button{width:36px;height:36px;border:0;border-radius:50%;background:var(--white);color:var(--brown);font-size:20px;font-weight:700;box-shadow:var(--shadow)}
+.servings-control strong{min-width:92px;text-align:center;color:var(--brown)}
+
 </style>
 </head>
 <body>
 <div class="app">
   <section id="home" class="screen active">
-    <div class="topbar"><div class="brand">Smaak<span>boek</span></div><button id="topProfileAvatar" class="avatar" onclick="showScreen('profile')">SB</button></div>
+    <div class="topbar"><div class="brand-wrap"><img class="brand-logo" src="/icons/smaakboek-logo.png" alt="Smaakboek logo"><div class="brand">Smaak<span>boek</span></div></div><button id="topProfileAvatar" class="avatar" onclick="showScreen('profile')">SB</button></div>
     <div class="content">
       <div class="eyebrow" data-t="personalCookbook">Uw persoonlijke kookboek</div>
       <h1 data-t="whatCook">Wat gaan we vandaag maken?</h1>
@@ -163,17 +173,17 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
     <div id="importResult" class="form">
       <div class="status done">✓ Foto's gelezen</div>
       <div class="status done">✓ Ingrediënten opgesteld</div>
-      <div class="status done">✓ Bereidingsstappen opgesteld</div>
+      <div class="status done">✓ Bereidingsstappen opgesteld</div><div class="ai-box" style="margin-top:10px">Controleer het recept gerust. U kunt naam, ingrediënten, bereidingswijze, aantal personen en tijd nog zelf aanpassen voordat u opslaat.</div>
       <div class="field"><label data-t="title">Naam gerecht</label><input id="aiTitle" /></div>
       <div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="aiIngredients"></textarea></div>
       <div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="aiSteps"></textarea></div>
-      <div class="field"><label data-t="time">Bereidingstijd</label><input id="aiTime" placeholder="30 min" /></div>
+      <div class="field"><label>Aantal personen waarop het recept is gebaseerd</label><div class="servings-field"><input id="aiServings" type="number" min="1" step="1" placeholder="Bijv. 4"></div><div class="servings-note">U kunt dit later bij het recept aanpassen. De hoeveelheden van de ingrediënten rekenen dan automatisch mee.</div></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="aiTime" placeholder="30 min" /></div>
       <div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="aiPrivate" class="privacy-option active" onclick="setPrivacy('ai',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="aiPublic" class="privacy-option" onclick="setPrivacy('ai',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div>
       <button class="primary" onclick="saveImported()" data-t="saveRecipe">Recept opslaan</button>
     </div>
   </div>
 
-  <div id="manualForm" class="form"><button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button><div class="eyebrow" data-t="manual">Handmatig toevoegen</div><h2 data-t="newRecipe">Nieuw recept</h2><div class="field"><label data-t="title">Naam gerecht</label><input id="manualTitle" /></div><div class="field"><label data-t="category">Categorie</label><select id="manualCategory"><option>Snel</option><option>Pasta</option><option>Gezond</option><option>Bakken</option><option>Vegetarisch</option></select></div><div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="manualIngredients"></textarea></div><div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="manualSteps"></textarea></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="manualTime" placeholder="30 min" /></div><div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="manualPrivate" class="privacy-option active" onclick="setPrivacy('manual',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="manualPublic" class="privacy-option" onclick="setPrivacy('manual',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div><button class="primary" onclick="saveManual()" data-t="saveRecipe">Recept opslaan</button></div>
+  <div id="manualForm" class="form"><button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button><div class="eyebrow" data-t="manual">Handmatig toevoegen</div><h2 data-t="newRecipe">Nieuw recept</h2><div class="field"><label data-t="title">Naam gerecht</label><input id="manualTitle" /></div><div class="field"><label data-t="category">Categorie</label><select id="manualCategory"><option>Snel</option><option>Pasta</option><option>Gezond</option><option>Bakken</option><option>Vegetarisch</option></select></div><div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="manualIngredients"></textarea></div><div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="manualSteps"></textarea></div><div class="field"><label>Aantal personen waarop het recept is gebaseerd</label><div class="servings-field"><input id="manualServings" type="number" min="1" step="1" placeholder="Bijv. 4"></div></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="manualTime" placeholder="30 min" /></div><div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="manualPrivate" class="privacy-option active" onclick="setPrivacy('manual',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="manualPublic" class="privacy-option" onclick="setPrivacy('manual',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div><button class="primary" onclick="saveManual()" data-t="saveRecipe">Recept opslaan</button></div>
 
   <div id="photoForm" class="form">
   <button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button>
@@ -207,7 +217,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
     <div class="field"><label data-t="title">Naam gerecht</label><input id="photoTitle" /></div>
     <div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="photoIngredients"></textarea></div>
     <div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="photoSteps"></textarea></div>
-    <div class="field"><label data-t="time">Bereidingstijd</label><input id="photoTime" placeholder="30 min" /></div>
+    <div class="field"><label>Aantal personen waarop het recept is gebaseerd</label><div class="servings-field"><input id="photoServings" type="number" min="1" step="1" placeholder="Bijv. 4"></div><div class="servings-note">Alle gevonden gegevens hieronder kunt u zelf aanpassen voordat u het recept opslaat.</div></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="photoTime" placeholder="30 min" /></div>
     <div class="field"><label data-t="visibility">Zichtbaarheid</label>
       <div class="privacy-row">
         <button id="photoPrivate" class="privacy-option active" onclick="setPrivacy('photo',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button>
@@ -256,7 +266,61 @@ function renderDiscover(){
   el.innerHTML=list.map(r=>`<article class="discover-card"><div class="discover-top"><div class="discover-avatar">${esc(r.author.slice(0,1))}</div><div class="discover-meta"><strong>${esc(r.author)}</strong><span>🌍 Openbaar recept</span></div><button class="small-btn" onclick="saveCommunity('${r.id}')">＋ Bewaar</button></div><div class="discover-photo"></div><h3>${esc(r.title)}</h3><p class="sub" style="font-size:13px;margin-bottom:10px">${esc(r.category)} · ${esc(r.time)} · ${esc(r.people)} personen</p><div class="discover-actions"><span class="badge">${r.ingredients.length} ingrediënten</span><button class="text-btn" onclick="openCommunity('${r.id}')">Bekijk recept →</button></div></article>`).join('')||'<div class="empty-start"><strong>Geen recepten gevonden</strong>Probeer een andere zoekterm of categorie.</div>';
   renderSuggested();
 }
-function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${esc(r.people||'—')} personen</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div><div class="block"><h2>Ingrediënten</h2>${r.ingredients.map(i=>`<label class="ingredient"><input type="checkbox"><span>${esc(i)}</span></label>`).join('')}</div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
+
+function parseQtyToken(token){
+  token=String(token||'').trim().replace(',', '.');
+  const unicodeFractions={'½':0.5,'⅓':1/3,'⅔':2/3,'¼':0.25,'¾':0.75,'⅕':0.2,'⅖':0.4,'⅗':0.6,'⅘':0.8,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875};
+  if(unicodeFractions[token]!==undefined)return unicodeFractions[token];
+  if(/^\d+\s+\d+\/\d+$/.test(token)){
+    const [whole,f]=token.split(/\s+/);const [a,b]=f.split('/').map(Number);return Number(whole)+(b?a/b:0);
+  }
+  if(/^\d+\/\d+$/.test(token)){const [a,b]=token.split('/').map(Number);return b?a/b:null}
+  const n=Number(token);return Number.isFinite(n)?n:null;
+}
+function formatQty(n){
+  if(!Number.isFinite(n))return '';
+  const rounded=Math.round(n*100)/100;
+  if(Number.isInteger(rounded))return String(rounded);
+  return String(rounded).replace('.',',');
+}
+function scaleIngredientLine(line,factor){
+  if(!Number.isFinite(factor)||factor===1)return line;
+  const s=String(line||'');
+
+  // Ranges such as 2-3 onions.
+  let m=s.match(/^\s*(\d+(?:[.,]\d+)?)\s*[-–]\s*(\d+(?:[.,]\d+)?)(.*)$/);
+  if(m){
+    const a=parseQtyToken(m[1]),b=parseQtyToken(m[2]);
+    if(a!==null&&b!==null)return `${formatQty(a*factor)}-${formatQty(b*factor)}${m[3]}`;
+  }
+
+  // Mixed fractions, normal fractions, unicode fractions or decimals at the start.
+  m=s.match(/^\s*((?:\d+\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+(?:[.,]\d+)?)|[½⅓⅔¼¾⅕⅖⅗⅘⅛⅜⅝⅞])(.*)$/);
+  if(!m)return s;
+  const qty=parseQtyToken(m[1]);
+  if(qty===null)return s;
+  return `${formatQty(qty*factor)}${m[2]}`;
+}
+function renderScaledIngredients(r,targetServings){
+  const base=Number(r.people);
+  const target=Number(targetServings);
+  const factor=(base>0&&target>0)?target/base:1;
+  return (r.ingredients||[]).map(i=>`<label class="ingredient"><input type="checkbox"><span>${esc(scaleIngredientLine(i,factor))}</span></label>`).join('');
+}
+function changeServingCount(id,delta){
+  const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;
+  const base=Number(r.people);
+  if(!base){toast('Bij dit recept is nog geen basis aantal personen ingesteld.');return}
+  const el=document.getElementById('servingCount');
+  const current=Math.max(1,Number(el?.dataset?.value||base));
+  const next=Math.max(1,current+delta);
+  el.dataset.value=String(next);
+  el.textContent=`${next} personen`;
+  const target=document.getElementById('scaledIngredients');
+  if(target)target.innerHTML=renderScaledIngredients(r,next);
+}
+
+function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${Number(r.people)>0?esc(r.people)+' personen':'Aantal personen niet ingesteld'}</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div><div class="block"><h2>Ingrediënten</h2>${Number(r.people)>0?`<div class="servings-control"><span>Hoeveel eten mee?</span><button onclick="changeServingCount('${r.id}',-1)">−</button><strong id="servingCount" data-value="${Number(r.people)}">${esc(r.people)} personen</strong><button onclick="changeServingCount('${r.id}',1)">＋</button></div>`:''}<div id="scaledIngredients">${renderScaledIngredients(r,Number(r.people)||1)}</div></div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
 function openCommunity(id){openRecipe(id)}
 function saveCommunity(id){const r=community.find(x=>x.id===id);if(!r)return;recipes.unshift({...r,id:'r'+Date.now(),favorite:false,author:'U',isPublic:false,source:'Community'});persist();renderAll();toast('Recept bewaard in uw Smaakboek')}
 function historyBack(){showScreen(previous==='detail'?'home':previous)}
@@ -450,7 +514,7 @@ async function insertRecipeRecord({title,category,time,ingredients,steps,isPubli
 async function saveManual(){
   const title=document.getElementById('manualTitle').value.trim(),ing=lines('manualIngredients'),steps=lines('manualSteps');
   if(!title||!ing.length||!steps.length){toast('Vul naam, ingrediënten en stappen in.');return}
-  try{await insertRecipeRecord({title,category:document.getElementById('manualCategory').value,time:document.getElementById('manualTime').value,ingredients:ing,steps,isPublic:!manualPrivate,sourceType:'manual'});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
+  try{await insertRecipeRecord({title,category:document.getElementById('manualCategory').value,time:document.getElementById('manualTime').value,servings:document.getElementById('manualServings').value||null,ingredients:ing,steps,isPublic:!manualPrivate,sourceType:'manual'});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
 }
 async function saveImported(){
   const title=document.getElementById('aiTitle').value.trim(),ing=lines('aiIngredients'),steps=lines('aiSteps');
@@ -458,7 +522,7 @@ async function saveImported(){
   const firstFile=document.getElementById('ingredientScreenshots')?.files?.[0]||document.getElementById('stepScreenshots')?.files?.[0];
   try{
     const imageUrl=firstFile?await uploadRecipeImage(firstFile):'';
-    await insertRecipeRecord({title,category:'Social media',time:document.getElementById('aiTime').value,ingredients:ing,steps,isPublic:!aiPrivate,sourceType:'other',imageUrl});
+    await insertRecipeRecord({title,category:'Social media',time:document.getElementById('aiTime').value,servings:document.getElementById('aiServings').value||null,ingredients:ing,steps,isPublic:!aiPrivate,sourceType:'other',imageUrl});
     document.getElementById('addOverlay').classList.remove('show');
     await loadOnlineData();
     showScreen('home');
@@ -477,7 +541,7 @@ async function savePhotoRecipe(){
   const title=document.getElementById('photoTitle').value.trim(),ing=lines('photoIngredients'),steps=lines('photoSteps');
   if(!title||!ing.length||!steps.length){toast('Controleer naam, ingrediënten en bereidingswijze.');return}
   const f=document.getElementById('photoIngredientScreenshots')?.files?.[0]||document.getElementById('photoStepScreenshots')?.files?.[0];
-  try{const imageUrl=f?await uploadRecipeImage(f):'';await insertRecipeRecord({title,category:'Uit kookboek',time:document.getElementById('photoTime').value,ingredients:ing,steps,isPublic:!photoPrivate,sourceType:'photo',imageUrl});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept vanaf foto opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
+  try{const imageUrl=f?await uploadRecipeImage(f):'';await insertRecipeRecord({title,category:'Uit kookboek',time:document.getElementById('photoTime').value,servings:document.getElementById('photoServings').value||null,ingredients:ing,steps,isPublic:!photoPrivate,sourceType:'photo',imageUrl});document.getElementById('addOverlay').classList.remove('show');await loadOnlineData();showScreen('home');toast('Recept vanaf foto opgeslagen')}catch(e){console.error(e);toast(e.message||'Opslaan is niet gelukt.')}
 }
 async function toggleFavorite(id){
   const u=await requireUser(); if(!u)return;
@@ -496,7 +560,7 @@ async function toggleRecipePrivacy(id){
 }
 async function saveCommunity(id){
   const r=community.find(x=>x.id===id);if(!r)return;
-  try{await insertRecipeRecord({title:r.title,category:r.category,time:r.time,ingredients:r.ingredients,steps:r.steps,isPublic:false,sourceType:'other',sourceUrl:r.url});await loadOnlineData();toast('Recept bewaard in uw Smaakboek')}catch(e){console.error(e);toast('Bewaren is niet gelukt.')}
+  try{await insertRecipeRecord({title:r.title,category:r.category,time:r.time,servings:(Number(r.people)||null),ingredients:r.ingredients,steps:r.steps,isPublic:false,sourceType:'other',sourceUrl:r.url});await loadOnlineData();toast('Recept bewaard in uw Smaakboek')}catch(e){console.error(e);toast('Bewaren is niet gelukt.')}
 }
 
 function fileToDataUrl(file){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(file)})}
@@ -505,7 +569,7 @@ function applyAiRecipe(rec,prefix){
   document.getElementById(prefix+'Title').value=rec.title||'';
   document.getElementById(prefix+'Ingredients').value=ing.join('\n');
   document.getElementById(prefix+'Steps').value=(rec.steps||[]).join('\n');
-  const total=(rec.prep_minutes||0)+(rec.cook_minutes||0);document.getElementById(prefix+'Time').value=total?total+' min':'';
+  const total=(rec.prep_minutes||0)+(rec.cook_minutes||0);document.getElementById(prefix+'Time').value=total?total+' min':'';const servingsEl=document.getElementById(prefix+'Servings');if(servingsEl)servingsEl.value=rec.servings||'';
   if(rec.missing_information?.length) toast('AI-resultaat klaar. Controleer nog: '+rec.missing_information.slice(0,2).join(', '));
 }
 async function invokeAi(payload){
@@ -594,7 +658,7 @@ async function analyzePhotoGroupedScreenshots(){
     const steps=stepLinesFromAi(rec);
     const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
-    document.getElementById('photoTitle').value=rec?.title||'';
+    document.getElementById('photoTitle').value=rec?.title||'';document.getElementById('photoServings').value=rec?.servings||'';
     document.getElementById('photoIngredients').value=ingredients.join('\\n');
     document.getElementById('photoSteps').value=steps.join('\\n');
     document.getElementById('photoTime').value=totalMinutes?totalMinutes+' min':'';
@@ -777,7 +841,7 @@ async function analyzeGroupedScreenshots(){
     const steps=stepLinesFromAi(rec);
     const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
-    document.getElementById('aiTitle').value=rec?.title||'';
+    document.getElementById('aiTitle').value=rec?.title||'';document.getElementById('aiServings').value=rec?.servings||'';
     document.getElementById('aiIngredients').value=ingredients.join('\\n');
     document.getElementById('aiSteps').value=steps.join('\\n');
     document.getElementById('aiTime').value=totalMinutes?totalMinutes+' min':'';
