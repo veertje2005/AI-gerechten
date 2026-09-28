@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smaakboek-v30';
+const CACHE_NAME = 'smaakboek-v32';
 const APP_SHELL = [
   '/',
   '/index.html',

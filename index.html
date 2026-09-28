@@ -236,6 +236,29 @@ img{max-width:100%}
 .quality-note{display:none;margin:10px 0;padding:11px 12px;background:#fff7df;border:1px solid #ead4a0;border-radius:13px;color:#76551c;font-size:12px;line-height:1.45}.quality-note.show{display:block}.contact-textarea{min-height:130px}
 @media(max-width:699px){.filter-row,.edit-grid,.legal-actions{grid-template-columns:1fr}.library-tab{font-size:11px}}
 
+
+/* Profielpagina rustiger en overzichtelijker */
+#profile .profile-card{padding:20px;border-radius:22px;margin-bottom:16px}
+#profile .profile-card h2{margin:0 0 14px}
+#profile .profile-card .field{margin:0 0 16px}
+#profile .profile-card .field:last-of-type{margin-bottom:18px}
+#profile #signedInBox .primary,
+#profile #signedInBox .secondary,
+#profile #signedInBox .danger-btn{margin-top:10px}
+#profile #signedInBox .primary{margin-top:4px}
+#profile #signedInBox .danger-btn{margin-top:16px}
+#profile #signedInBox .secondary + .secondary{margin-top:8px}
+#profile .profile-actions-separator{height:1px;background:var(--line);margin:18px 0 8px}
+#profile .profile-actions-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+#profile .account-danger-zone{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+#profile .account-danger-zone .danger-btn{margin-top:8px}
+@media(max-width:699px){
+  #profile .profile-card{padding:18px 16px;margin-bottom:14px}
+  #profile #signedInBox .primary,
+  #profile #signedInBox .secondary,
+  #profile #signedInBox .danger-btn{min-height:50px}
+}
+
 </style>
 </head>
 <body>
@@ -245,7 +268,7 @@ img{max-width:100%}
     <div class="content">
       <div class="eyebrow" data-t="personalCookbook">Uw persoonlijke kookboek</div>
       <h1 data-t="whatCook">Wat gaan we vandaag maken?</h1>
-      <div class="search"><span>⌕</span><input id="search" type="search" name="smaakboek_recipe_search" autocomplete="off" autocapitalize="off" spellcheck="false" data-ph="search" placeholder="Zoek op gerecht of ingrediënt..." /></div>
+  
       <div id="suggestedCard" class="featured" onclick="openSuggested()"><div class="tag">Voorgesteld voor jou</div><h3 id="suggestedTitle">Ontdek nieuwe recepten</h3><div class="meta"><span id="suggestedTime">Van de community</span><span id="suggestedPeople">♡ Bewaar wat u lekker vindt</span></div></div>
       <div class="section-row"><h2 data-t="categories">Categorieën</h2></div>
       <div class="chips"><button class="chip active" data-cat="Alles" data-t="all">Alles</button><button class="chip" data-cat="Snel" data-t="quick">Snel</button><button class="chip" data-cat="Pasta">Pasta</button><button class="chip" data-cat="Gezond" data-t="healthy">Gezond</button><button class="chip" data-cat="Bakken" data-t="baking">Bakken</button></div>
@@ -294,10 +317,17 @@ img{max-width:100%}
           <div class="profile-field"><label>E-mailadres <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)">· alleen zichtbaar voor u</span></label><input id="profileEmail" type="email" disabled></div>
         </div>
         <button id="saveProfileBtn" class="primary" onclick="saveProfile()">Profiel opslaan</button>
+
+        <div class="profile-actions-separator"></div>
+        <div class="profile-actions-label">Beveiliging</div>
         <button class="secondary" onclick="changePassword()">Wachtwoord wijzigen</button>
         <button class="secondary" onclick="logoutEverywhere()">Uitloggen op alle apparaten</button>
         <button class="secondary" onclick="logout()" data-t="logout">Uitloggen</button>
-        <button class="danger-btn" onclick="deleteAccount()">Account verwijderen</button>
+
+        <div class="account-danger-zone">
+          <div class="profile-actions-label">Account</div>
+          <button class="danger-btn" onclick="deleteAccount()">Account verwijderen</button>
+        </div>
       </div>
 
       <div class="profile-card" id="installCard">
@@ -482,7 +512,7 @@ function card(r){return `<article class="card" onclick="openRecipe('${r.id}')"><
 function recipeTimeMinutes(r){return parseInt(String(r.time||'').match(/\d+/)?.[0]||'0')||0}
 function recipeMatchesFilters(r,q,category,maxTime){const hay=(r.title+' '+r.category+' '+(r.ingredients||[]).join(' ')).toLowerCase();if(q&&!hay.includes(q))return false;if(category&&(r.category||'').toLowerCase()!==category.toLowerCase())return false;if(maxTime&&recipeTimeMinutes(r)>Number(maxTime))return false;return true}
 function setRecipeLibraryTab(tab){recipeLibraryTab=tab;document.querySelectorAll('[data-library-tab]').forEach(b=>b.classList.toggle('active',b.dataset.libraryTab===tab));renderAll()}
-function renderAll(){const q=(document.getElementById('search')?.value||'').toLowerCase().trim();const homeList=recipes.filter(r=>recipeMatchesFilters(r,q,'',''));document.getElementById('recipeGrid').innerHTML=homeList.slice(0,6).map(card).join('')||'<div class="empty-start"><strong>Nog geen recepten</strong>Voeg uw eerste gerecht toe via foto’s of handmatig.<br><button onclick="openAdd()">＋ Recept toevoegen</button></div>';const q2=(document.getElementById('searchAll')?.value||'').toLowerCase().trim();const cat=document.getElementById('recipeCategoryFilter')?.value||'';const maxTime=document.getElementById('recipeTimeFilter')?.value||'';let library=recipes.slice();if(recipeLibraryTab==='mine')library=library.filter(r=>!r.savedFromRecipeId);if(recipeLibraryTab==='saved')library=library.filter(r=>!!r.savedFromRecipeId);if(recipeLibraryTab==='favorites')library=library.filter(r=>r.favorite);library=library.filter(r=>recipeMatchesFilters(r,q2,cat,maxTime));const emptyText=recipeLibraryTab==='saved'?'Nog geen opgeslagen recepten':recipeLibraryTab==='favorites'?'Nog geen favorieten':'Nog geen eigen recepten';document.getElementById('recipeGridAll').innerHTML=library.map(card).join('')||`<div class="empty-start"><strong>${emptyText}</strong>Gebruik zoeken, Ontdek of voeg een nieuw recept toe.</div>`;const fav=recipes.filter(r=>r.favorite);document.getElementById('favoriteGrid').innerHTML=fav.map(card).join('')||'<div class="empty-start"><strong>Nog geen favorieten</strong>Markeer een recept met het hartje om het hier terug te vinden.</div>';renderDiscover();renderAccount()}
+function renderAll(){const q='';const homeList=recipes.filter(r=>recipeMatchesFilters(r,q,'',''));document.getElementById('recipeGrid').innerHTML=homeList.slice(0,6).map(card).join('')||'<div class="empty-start"><strong>Nog geen recepten</strong>Voeg uw eerste gerecht toe via foto’s of handmatig.<br><button onclick="openAdd()">＋ Recept toevoegen</button></div>';const q2=(document.getElementById('searchAll')?.value||'').toLowerCase().trim();const cat=document.getElementById('recipeCategoryFilter')?.value||'';const maxTime=document.getElementById('recipeTimeFilter')?.value||'';let library=recipes.slice();if(recipeLibraryTab==='mine')library=library.filter(r=>!r.savedFromRecipeId);if(recipeLibraryTab==='saved')library=library.filter(r=>!!r.savedFromRecipeId);if(recipeLibraryTab==='favorites')library=library.filter(r=>r.favorite);library=library.filter(r=>recipeMatchesFilters(r,q2,cat,maxTime));const emptyText=recipeLibraryTab==='saved'?'Nog geen opgeslagen recepten':recipeLibraryTab==='favorites'?'Nog geen favorieten':'Nog geen eigen recepten';document.getElementById('recipeGridAll').innerHTML=library.map(card).join('')||`<div class="empty-start"><strong>${emptyText}</strong>Gebruik zoeken, Ontdek of voeg een nieuw recept toe.</div>`;const fav=recipes.filter(r=>r.favorite);document.getElementById('favoriteGrid').innerHTML=fav.map(card).join('')||'<div class="empty-start"><strong>Nog geen favorieten</strong>Markeer een recept met het hartje om het hier terug te vinden.</div>';renderDiscover();renderAccount()}
 function renderSuggested(){
   const card=document.getElementById('suggestedCard'); if(!card)return;
   let list=community.slice();
@@ -603,7 +633,7 @@ function clearAccidentalEmailFromSearch(){
   const email=(currentUser?.email||'').toLowerCase();
   ['search','searchAll','discoverSearch'].forEach(id=>{const el=document.getElementById(id);if(el&&email&&el.value.trim().toLowerCase()===email)el.value=''});
 }
-document.getElementById('search').addEventListener('input',renderAll);document.getElementById('searchAll').addEventListener('input',renderAll);document.getElementById('discoverSearch').addEventListener('input',renderDiscover);
+document.getElementById('searchAll').addEventListener('input',renderAll);document.getElementById('discoverSearch').addEventListener('input',renderDiscover);
 document.querySelectorAll('[data-cat]').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('[data-cat]').forEach(x=>x.classList.remove('active'));c.classList.add('active');const val=c.dataset.cat;const list=val==='Alles'?recipes:recipes.filter(r=>(r.category||'').toLowerCase().includes(val.toLowerCase()));document.getElementById('recipeGrid').innerHTML=list.slice(0,6).map(card).join('')||'<div class="empty">Geen recepten in deze categorie.</div>'}));
 document.querySelectorAll('[data-discover-cat]').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('[data-discover-cat]').forEach(x=>x.classList.remove('active'));c.classList.add('active');discoverCategory=c.dataset.discoverCat||'Alles';renderDiscover()}));
 const defPriv=localStorage.getItem('smaakboekDefaultPrivate');if(defPriv==='0')document.getElementById('defaultPrivacy').classList.remove('on');setLanguage(currentLang);renderAll();
@@ -879,7 +909,7 @@ async function forgotPassword(){const email=window.prompt('Vul het e-mailadres v
 async function changePassword(){const pass=window.prompt('Kies een nieuw wachtwoord van minimaal 8 tekens:');if(!pass)return;if(pass.length<8){toast('Gebruik minimaal 8 tekens.');return}const {error}=await sb.auth.updateUser({password:pass});if(error){toast(error.message);return}toast('Wachtwoord gewijzigd.')}
 async function logoutEverywhere(){if(!confirm('Wilt u op alle apparaten uitloggen?'))return;const {error}=await sb.auth.signOut({scope:'global'});if(error){toast(error.message);return}currentUser=null;currentProfile=null;recipes=[];community.splice(0,community.length);renderAll();renderAccount();showScreen('home');toast('Op alle apparaten uitgelogd.')}
 async function deleteAccount(){if(!confirm('Uw account en eigen recepten definitief verwijderen? Dit kan niet ongedaan worden gemaakt.'))return;const typed=window.prompt('Typ VERWIJDEREN om te bevestigen:');if(typed!=='VERWIJDEREN'){toast('Account verwijderen geannuleerd.');return}try{const {data,error}=await sb.functions.invoke('delete-account',{body:{confirm:'VERWIJDEREN'}});if(error)throw error;if(data?.error)throw new Error(data.error);await sb.auth.signOut().catch(()=>{});currentUser=null;currentProfile=null;recipes=[];community.splice(0,community.length);renderAll();renderAccount();showScreen('home');toast('Account verwijderd.')}catch(e){console.error(e);toast(e.message||'Account verwijderen is niet gelukt.')}}
-const infoPages={privacy:`<div class="eyebrow">Privacy</div><h2>Privacyverklaring</h2><p>Smaakboek verwerkt accountgegevens om u te laten inloggen en uw recepten te bewaren. Uw e-mailadres wordt niet openbaar weergegeven.</p><p>Privé-recepten zijn bedoeld voor uw account. Openbare recepten en daarbij gedeelde gerechtfoto’s kunnen door andere gebruikers worden bekeken.</p><p>Foto’s, recepten en profielinformatie worden opgeslagen via Supabase. AI-fotoherkenning verloopt via een serverfunctie en Gemini.</p><p>Deel geen gevoelige persoonsgegevens in recepten, foto’s of openbare profielvelden.</p>`,terms:`<div class="eyebrow">Gebruik</div><h2>Gebruiksvoorwaarden</h2><p>Gebruik Smaakboek alleen voor inhoud die u mag opslaan en delen. Plaats geen illegale, beledigende of schadelijke inhoud en respecteer auteursrechten.</p><p>Openbare inhoud kan worden verwijderd wanneer deze de regels schendt. AI-resultaten zijn hulpmiddelen en moeten vóór gebruik worden gecontroleerd.</p>`,ai:`<div class="eyebrow">AI</div><h2>AI & veiligheid</h2><p>AI kan ingrediënten, hoeveelheden of bereidingsstappen verkeerd lezen. Controleer een AI-recept altijd.</p><p>Bij allergieën, intoleranties, zwangerschap of andere gezondheidsrisico’s moet u de oorspronkelijke productinformatie en betrouwbare deskundige informatie controleren.</p><p>Per account geldt een dagelijkse AI-limiet.</p>`,contact:`<div class="eyebrow">Contact</div><h2>Neem contact op</h2><p>Stuur via dit formulier een vraag of opmerking naar de beheerder van Smaakboek.</p><div class="field"><label>Bericht</label><textarea id="contactMessage" class="contact-textarea" maxlength="1500" placeholder="Waar kunnen we mee helpen?"></textarea></div><button class="primary" onclick="sendContactMessage()">Versturen</button>`};
+const infoPages={privacy:`<div class="eyebrow">Privacy</div><h2>Privacyverklaring</h2><p>Smaakboek verwerkt accountgegevens om u te laten inloggen en uw recepten te bewaren. Uw e-mailadres wordt niet openbaar weergegeven.</p><p>Privé-recepten zijn bedoeld voor uw account. Openbare recepten en daarbij gedeelde gerechtfoto’s kunnen door andere gebruikers worden bekeken.</p><p>Foto’s, recepten en profielinformatie worden opgeslagen via Supabase. AI-fotoherkenning verloopt via een serverfunctie en Gemini.</p><p>Deel geen gevoelige persoonsgegevens in recepten, foto’s of openbare profielvelden.</p>`,terms:`<div class="eyebrow">Gebruik</div><h2>Gebruiksvoorwaarden</h2><p>Gebruik Smaakboek alleen voor inhoud die u mag opslaan en delen. Plaats geen illegale, beledigende of schadelijke inhoud en respecteer auteursrechten.</p><p>Openbare inhoud kan worden verwijderd wanneer deze de regels schendt. AI-resultaten zijn hulpmiddelen en moeten vóór gebruik worden gecontroleerd.</p>`,ai:`<div class="eyebrow">AI</div><h2>AI & veiligheid</h2><p>AI kan ingrediënten, hoeveelheden of bereidingsstappen verkeerd lezen. Controleer een AI-recept altijd.</p><p>Bij allergieën, intoleranties, zwangerschap of andere gezondheidsrisico’s moet u de oorspronkelijke productinformatie en betrouwbare deskundige informatie controleren.</p><p>Per account geldt een dagelijkse AI-limiet.</p>`,contact:`<div class="eyebrow">Contact</div><h2>Neem contact op</h2><p>Stuur via dit formulier een vraag of opmerking naar de beheerder van Smaakboek.</p><div class="ai-box" style="margin-bottom:12px">Uw bericht wordt veilig opgeslagen bij Smaakboek. Het wordt op dit moment niet automatisch per e-mail verstuurd.</div><div class="field"><label>Bericht</label><textarea id="contactMessage" class="contact-textarea" maxlength="1500" placeholder="Waar kunnen we mee helpen?"></textarea></div><button class="primary" onclick="sendContactMessage()">Versturen</button>`};
 function openInfoPage(key){document.getElementById('infoContent').innerHTML=infoPages[key]||'';document.getElementById('infoOverlay').classList.add('show')}function closeInfoPage(){document.getElementById('infoOverlay').classList.remove('show')}
 async function sendContactMessage(){const msg=document.getElementById('contactMessage')?.value.trim();if(!msg){toast('Schrijf eerst een bericht.');return}const u=await requireUser();if(!u)return;const {error}=await sb.from('contact_messages').insert({user_id:u.id,email:u.email||null,message:msg.slice(0,1500)});if(error){toast(error.message);return}closeInfoPage();toast('Bericht verstuurd.')}
 function fileToDataUrl(file){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=reject;fr.readAsDataURL(file)})}
