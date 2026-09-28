@@ -121,12 +121,21 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
   <div id="importForm" class="form"><button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button><div class="eyebrow">AI import</div><h2 data-t="importSocial">Importeer uit TikTok, Instagram of Facebook</h2>
     <div class="source-tabs"><button class="source-tab active" onclick="setSource(this,'auto')">Auto</button><button class="source-tab" onclick="setSource(this,'tiktok')">TikTok</button><button class="source-tab" onclick="setSource(this,'instagram')">Instagram</button><button class="source-tab" onclick="setSource(this,'facebook')">Facebook</button></div>
-    <div class="ai-box"><div class="import-help"><span class="num">1</span><div><strong data-t="stepShare">Deel of kopieer de link</strong><div data-t="stepShareExplain">Tik in TikTok, Instagram of Facebook op Delen → Link kopiëren.</div></div></div><div class="import-help"><span class="num">2</span><div><strong data-t="stepPaste">Plak de link hieronder</strong><div data-t="stepPasteExplain">Wij herkennen automatisch van welk platform de link komt.</div></div></div><div class="import-help"><span class="num">3</span><div><strong data-t="stepCheck">Controleer het AI-resultaat</strong><div data-t="stepCheckExplain">Controleer het resultaat en vul ontbrekende bereidingsstappen zelf aan voordat u opslaat.</div></div></div></div>
+    <div class="ai-box"><div class="import-help"><span class="num">1</span><div><strong data-t="stepShare">Deel of kopieer de link</strong><div data-t="stepShareExplain">Tik in TikTok, Instagram of Facebook op Delen → Link kopiëren.</div></div></div><div class="import-help"><span class="num">2</span><div><strong data-t="stepPaste">Plak de link hieronder</strong><div data-t="stepPasteExplain">Wij herkennen automatisch van welk platform de link komt.</div></div></div><div class="import-help"><span class="num">3</span><div><strong data-t="stepCheck">Controleer het AI-resultaat</strong><div data-t="stepCheckExplain">Controleer het resultaat. Mist er iets uit de video? Voeg dan optioneel een screenshot toe om het recept aan te vullen.</div></div></div></div>
     <div class="field"><label data-t="recipeLink">Link naar recept of video</label><div style="display:grid;grid-template-columns:1fr auto;gap:8px"><input id="importUrl" placeholder="Plak TikTok-, Instagram-, Facebook- of receptlink"/><button class="small-btn" onclick="pasteLink()" data-t="paste">Plakken</button></div></div>
     <button class="primary" onclick="analyzeLink()">✦ <span data-t="analyzeAI">Analyseren met AI</span></button>
     <div id="loading" class="loading"><span data-t="analyzing">Video en tekst analyseren</span><br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
     <div id="importResult" class="form"><div class="status done">✓ <span data-t="sourceFound">Bron herkend</span></div><div class="status done">✓ <span data-t="ingredientsFound">Ingrediënten opgesteld</span></div><div class="status done">✓ <span data-t="stepsFound">Bereidingsstappen opgesteld</span></div>
-      <div id="socialFallback" class="social-fallback"><strong>Bereidingswijze niet volledig gevonden</strong><p>Een deel van de bereidingswijze staat mogelijk alleen in de video. Vul zelf de missende stappen van de bereidingswijze toe in het vak hieronder voordat u het recept opslaat.</p></div>
+      <div id="socialFallback" class="social-fallback">
+        <strong>Bereidingswijze niet volledig gevonden</strong>
+        <p>Een deel van het recept staat mogelijk alleen in de video. Voeg eventueel een screenshot toe van het gedeelte met ingrediënten of bereidingsstappen. Smaakboek leest de screenshot en vult het recept aan.</p>
+        <div class="field" style="margin-top:12px">
+          <label for="socialScreenshot">Screenshot uit TikTok, Instagram of Facebook</label>
+          <input id="socialScreenshot" type="file" accept="image/*" />
+        </div>
+        <button type="button" class="small-btn" style="margin-top:8px" onclick="analyzeSocialScreenshot()">Aanvullen met screenshot</button>
+        <div id="socialScreenshotLoading" class="loading" style="margin-top:10px">Screenshot analyseren…</div>
+      </div>
       <div class="field"><label data-t="title">Naam gerecht</label><input id="aiTitle" /></div><div class="field"><label data-t="ingredients">Ingrediënten — één per regel</label><textarea id="aiIngredients"></textarea></div><div class="field"><label data-t="preparation">Bereidingswijze — één stap per regel</label><textarea id="aiSteps"></textarea></div><div class="field"><label data-t="time">Bereidingstijd</label><input id="aiTime" placeholder="30 min" /></div>
       <div class="field"><label data-t="visibility">Zichtbaarheid</label><div class="privacy-row"><button id="aiPrivate" class="privacy-option active" onclick="setPrivacy('ai',true)"><strong>🔒 <span data-t="private">Privé</span></strong><span data-t="privateExplain">Alleen zichtbaar voor u</span></button><button id="aiPublic" class="privacy-option" onclick="setPrivacy('ai',false)"><strong>🌍 <span data-t="public">Openbaar</span></strong><span data-t="publicExplain">Anderen kunnen dit recept vinden</span></button></div></div>
       <button class="primary" onclick="saveImported()" data-t="saveRecipe">Recept opslaan</button>
@@ -451,6 +460,56 @@ async function analyzeLink(){
   }catch(e){
     console.error(e);document.getElementById('importResult').classList.add('show');showSocialFallback(true);toast('De link kon niet volledig worden gelezen. Vul de missende bereidingsstappen zelf aan.');
   }finally{document.getElementById('loading').classList.remove('show')}
+}
+
+
+function mergeUniqueLines(existing, incoming){
+  const seen=new Set();
+  const out=[];
+  [...existing,...incoming].forEach(v=>{
+    const s=String(v||'').trim();
+    if(!s)return;
+    const key=s.toLowerCase().replace(/\s+/g,' ');
+    if(!seen.has(key)){seen.add(key);out.push(s)}
+  });
+  return out;
+}
+
+async function analyzeSocialScreenshot(){
+  const input=document.getElementById('socialScreenshot');
+  const f=input?.files?.[0];
+  if(!f){toast('Kies eerst een screenshot.');return}
+  const loading=document.getElementById('socialScreenshotLoading');
+  loading?.classList.add('show');
+  try{
+    const dataUrl=await fileToDataUrl(f);
+    const rec=await invokeAi({mode:'photo',image_data_url:dataUrl,language:currentLang});
+
+    const currentIngredients=lines('aiIngredients');
+    const screenshotIngredients=(rec.ingredients||[]).map(i=>
+      [i.amount,i.unit,i.name,i.note?`(${i.note})`:''].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()
+    );
+    const currentSteps=lines('aiSteps');
+    const screenshotSteps=Array.isArray(rec.steps)?rec.steps:[];
+
+    document.getElementById('aiIngredients').value=mergeUniqueLines(currentIngredients,screenshotIngredients).join('\n');
+    document.getElementById('aiSteps').value=mergeUniqueLines(currentSteps,screenshotSteps).join('\n');
+
+    if(!document.getElementById('aiTitle').value.trim() && rec.title){
+      document.getElementById('aiTitle').value=rec.title;
+    }
+    const total=(rec.prep_minutes||0)+(rec.cook_minutes||0);
+    if(!document.getElementById('aiTime').value.trim() && total){
+      document.getElementById('aiTime').value=total+' min';
+    }
+
+    toast('Screenshot gelezen. Het recept is aangevuld; controleer het resultaat.');
+  }catch(e){
+    console.error(e);
+    toast(e.message||'De screenshot kon niet worden gelezen.');
+  }finally{
+    loading?.classList.remove('show');
+  }
 }
 
 sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(loadOnlineData,0)});
