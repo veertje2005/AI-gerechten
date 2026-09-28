@@ -513,12 +513,32 @@ function previewSocialScreenshots(event){
     files.length?`${files.length} van maximaal 3 screenshots gekozen`:'Nog geen screenshots gekozen';
 }
 
+function cleanRecipeLine(value){
+  return String(value ?? '')
+    .replace(/\\r\\n|\\n|\\r/g, '\n')
+    .replace(/\u00a0/g, ' ')
+    .replace(/^[\s•●▪◦\-–—*]+/, '')
+    .replace(/^\d+\s*[\.\):\-]\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function splitRecipeLines(value){
+  if(value == null) return [];
+  if(Array.isArray(value)) return value.flatMap(splitRecipeLines);
+  return String(value)
+    .replace(/\\r\\n|\\n|\\r/g, '\n')
+    .split(/\n+/)
+    .map(cleanRecipeLine)
+    .filter(Boolean);
+}
+
 function mergeUniqueRecipeLines(existing,incoming){
-  const normalize=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+  const normalize=s=>cleanRecipeLine(s).toLowerCase();
   const result=[];
   const seen=new Set();
-  [...(existing||[]),...(incoming||[])].forEach(x=>{
-    const clean=String(x||'').trim();
+  [...splitRecipeLines(existing),...splitRecipeLines(incoming)].forEach(x=>{
+    const clean=cleanRecipeLine(x);
     const key=normalize(clean);
     if(clean&&!seen.has(key)){seen.add(key);result.push(clean)}
   });
@@ -526,10 +546,22 @@ function mergeUniqueRecipeLines(existing,incoming){
 }
 
 function ingredientLinesFromAi(rec){
-  return (rec?.ingredients||[]).map(i=>{
-    if(typeof i==='string') return i.trim();
-    return [i.amount,i.unit,i.name,i.note?`(${i.note})`:'' ].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
-  }).filter(Boolean);
+  const result=[];
+  (rec?.ingredients||[]).forEach(i=>{
+    if(typeof i==='string'){
+      result.push(...splitRecipeLines(i));
+      return;
+    }
+    const combined=[i?.amount,i?.unit,i?.name,i?.note?`(${i.note})`:'' ]
+      .filter(Boolean)
+      .join(' ');
+    result.push(...splitRecipeLines(combined));
+  });
+  return result;
+}
+
+function stepLinesFromAi(rec){
+  return splitRecipeLines(rec?.steps||[]);
 }
 
 async function analyzeSocialScreenshots(){
@@ -554,7 +586,7 @@ async function analyzeSocialScreenshots(){
         successCount++;
         if(!title && rec?.title) title=rec.title;
         ingredients=mergeUniqueRecipeLines(ingredients,ingredientLinesFromAi(rec));
-        steps=mergeUniqueRecipeLines(steps,Array.isArray(rec?.steps)?rec.steps:[]);
+        steps=mergeUniqueRecipeLines(steps,stepLinesFromAi(rec));
         const mins=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
         if(mins>totalMinutes) totalMinutes=mins;
       }catch(err){
@@ -565,15 +597,15 @@ async function analyzeSocialScreenshots(){
     if(!successCount) throw new Error('De screenshots konden op dit moment niet door AI worden gelezen. Probeer het over een paar minuten opnieuw.');
 
     document.getElementById('aiTitle').value=title||'';
-    document.getElementById('aiIngredients').value=ingredients.join('\\n');
-    document.getElementById('aiSteps').value=steps.join('\\n');
+    document.getElementById('aiIngredients').value=ingredients.join('\n');
+    document.getElementById('aiSteps').value=steps.join('\n');
     document.getElementById('aiTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('importResult').classList.add('show');
 
     if(successCount<files.length){
       toast(`${successCount} van ${files.length} screenshots zijn gelezen. Controleer het resultaat.`);
     }else{
-      toast('Alle screenshots zijn gelezen. Controleer het recept.');
+      toast('Alle screenshots zijn gelezen en netjes per regel gezet. Controleer het recept.');
     }
   }catch(e){
     console.error(e);
