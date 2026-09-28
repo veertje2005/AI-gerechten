@@ -1,2 +1,27 @@
 # Smaakboek
-Een slimme receptenapp waarin u eenvoudig uw favoriete gerechten bewaart. Voeg recepten handmatig toe of importeer ze via links van TikTok, Instagram en andere websites. De app gebruikt AI om ingrediënten en bereidingswijzen overzichtelijk voor u uit te werken. Zo heeft u al uw favoriete recepten op één rustige en overzichtelijke plek.
+
+Smaakboek is een persoonlijke receptenapp met:
+- eigen recepten
+- AI-import vanaf foto's en receptlinks
+- openbare recepten ontdekken
+- favorieten
+- profiel en meerdere talen
+- PWA-ondersteuning voor toevoegen aan het beginscherm
+
+## Belangrijkste bestanden
+
+- `index.html` – de app
+- `manifest.webmanifest` – appnaam, kleuren en iconen
+- `service-worker.js` – PWA/offline basis
+- `icons/` – favicon, iPhone- en Android-iconen
+- `robots.txt` – basisinstellingen voor zoekmachines
+
+## Publiceren
+
+Upload alle bestanden en de map `icons` naar de hoofdmap van de GitHub-repository.
+Vercel kan daarna automatisch opnieuw deployen.
+
+## Veiligheid
+
+API-secrets horen niet in GitHub of in `index.html`.
+Bewaar geheime sleutels uitsluitend als server-side secrets, bijvoorbeeld in Supabase Edge Functions.
