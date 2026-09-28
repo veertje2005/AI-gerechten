@@ -143,7 +143,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
     <div class="social-upload-box">
       <label for="ingredientScreenshots">Ingrediënten uploaden</label>
-      <input id="ingredientScreenshots" type="file" accept="image/*" multiple onchange="previewGroupedScreenshots('ingredient')" />
+      <input id="ingredientScreenshots" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onchange="previewGroupedScreenshots('ingredient')" oninput="previewGroupedScreenshots('ingredient')" />
       <div class="small-note">Upload 1 of 2 foto's waarop de ingrediënten duidelijk zichtbaar zijn.</div>
       <div id="ingredientFileCount" class="social-file-count">Nog geen foto's gekozen</div>
       <div id="ingredientPreviewGrid" class="social-preview-grid"></div>
@@ -151,7 +151,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 
     <div class="social-upload-box">
       <label for="stepScreenshots">Bereidingswijze uploaden</label>
-      <input id="stepScreenshots" type="file" accept="image/*" multiple onchange="previewGroupedScreenshots('steps')" />
+      <input id="stepScreenshots" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onchange="previewGroupedScreenshots('steps')" oninput="previewGroupedScreenshots('steps')" />
       <div class="small-note">Upload 1 of 2 foto's waarop de bereidingswijze duidelijk zichtbaar is.</div>
       <div id="stepFileCount" class="social-file-count">Nog geen foto's gekozen</div>
       <div id="stepPreviewGrid" class="social-preview-grid"></div>
@@ -590,10 +590,8 @@ async function analyzePhotoGroupedScreenshots(){
     }
 
     document.getElementById('photoTitle').value=ingredientResult.title||stepResult.title||'';
-    document.getElementById('photoIngredients').value=(ingredientResult.ingredients||[]).join('
-');
-    document.getElementById('photoSteps').value=(stepResult.steps||[]).join('
-');
+    document.getElementById('photoIngredients').value=(ingredientResult.ingredients||[]).join('\\n');
+    document.getElementById('photoSteps').value=(stepResult.steps||[]).join('\\n');
 
     const totalMinutes=Math.max(ingredientResult.totalMinutes||0,stepResult.totalMinutes||0);
     document.getElementById('photoTime').value=totalMinutes?totalMinutes+' min':'';
@@ -786,6 +784,60 @@ async function analyzeGroupedScreenshots(){
     document.getElementById('loading').classList.remove('show');
   }
 }
+
+
+
+function syncSocialFileCounts(){
+  const configs=[
+    ['ingredientScreenshots','ingredientFileCount'],
+    ['stepScreenshots','stepFileCount']
+  ];
+  configs.forEach(([inputId,countId])=>{
+    const input=document.getElementById(inputId);
+    const count=document.getElementById(countId);
+    if(!input||!count)return;
+    const n=input.files?.length||0;
+    count.textContent=n ? `${n} van maximaal 2 foto's gekozen` : `Nog geen foto's gekozen`;
+  });
+}
+
+window.addEventListener('pageshow',()=>{
+  setTimeout(syncSocialFileCounts,0);
+});
+
+window.addEventListener('focus',()=>{
+  setTimeout(syncSocialFileCounts,150);
+});
+
+function syncPhotoFileCounts(){
+  const configs=[
+    ['photoIngredientScreenshots','photoIngredientFileCount'],
+    ['photoStepScreenshots','photoStepFileCount']
+  ];
+  configs.forEach(([inputId,countId])=>{
+    const input=document.getElementById(inputId);
+    const count=document.getElementById(countId);
+    if(!input||!count)return;
+    const n=input.files?.length||0;
+    count.textContent=n ? `${n} van maximaal 2 foto's gekozen` : `Nog geen foto's gekozen`;
+  });
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  ['photoIngredientScreenshots','photoStepScreenshots'].forEach(id=>{
+    const input=document.getElementById(id);
+    if(!input)return;
+    input.addEventListener('change',()=>setTimeout(syncPhotoFileCounts,0));
+    input.addEventListener('input',()=>setTimeout(syncPhotoFileCounts,0));
+  });
+
+  ['ingredientScreenshots','stepScreenshots'].forEach(id=>{
+    const input=document.getElementById(id);
+    if(!input)return;
+    input.addEventListener('change',()=>setTimeout(syncSocialFileCounts,0));
+    input.addEventListener('input',()=>setTimeout(syncSocialFileCounts,0));
+  });
+});
 
 sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(loadOnlineData,0)});
 loadOnlineData();
