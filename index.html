@@ -59,6 +59,17 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
 .servings-control button{width:36px;height:36px;border:0;border-radius:50%;background:var(--white);color:var(--brown);font-size:20px;font-weight:700;box-shadow:var(--shadow)}
 .servings-control strong{min-width:92px;text-align:center;color:var(--brown)}
 
+
+.ai-limit-box{margin:12px 0 16px;padding:12px 14px;border:1px solid rgba(112,69,36,.14);border-radius:15px;background:#fbf7f3;color:var(--brown);font-size:13px;line-height:1.45}
+.ai-limit-box strong{display:block;font-size:14px;margin-bottom:2px}
+.ai-limit-box.limit-reached{background:#f6ece7;border-color:rgba(160,70,45,.22)}
+.ai-limit-box .remaining{font-weight:700}
+button.ai-disabled{opacity:.5;pointer-events:none}
+
+
+.delete-recipe-btn{border:1px solid rgba(145,55,40,.22);background:#fff5f2;color:#8d3025}
+.delete-recipe-btn:hover{background:#fbe7e2}
+
 </style>
 </head>
 <body>
@@ -144,6 +155,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
     <button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button>
     <div class="eyebrow">AI import</div>
     <h2 data-t="importSocial">Recept van social media toevoegen</h2>
+    <div id="socialAiLimit" class="ai-limit-box"><strong>AI-gebruik vandaag</strong><span class="remaining">Maximaal 10 AI-recepten per dag.</span></div>
 
     <div class="ai-box">
       <div class="import-help"><span class="num">1</span><div><strong>Maak screenshots</strong><div>Maak screenshots van de ingrediënten en bereidingswijze uit TikTok, Instagram of Facebook.</div></div></div>
@@ -167,7 +179,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
       <div id="stepPreviewGrid" class="social-preview-grid"></div>
     </div>
 
-    <button class="primary" onclick="analyzeGroupedScreenshots()">✦ Recept herkennen met AI</button>
+    <button id="socialAiButton" class="primary" onclick="analyzeGroupedScreenshots()">✦ Recept herkennen met AI</button>
     <div id="loading" class="loading">Foto's analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
 
     <div id="importResult" class="form">
@@ -189,6 +201,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
   <button class="text-btn" onclick="backToMenu()">← <span data-t="back">Terug</span></button>
   <div class="eyebrow" data-t="photo">Vanaf foto's</div>
   <h2>Recept vanaf foto's</h2>
+  <div id="photoAiLimit" class="ai-limit-box"><strong>AI-gebruik vandaag</strong><span class="remaining">Maximaal 10 AI-recepten per dag.</span></div>
   <div class="ai-box">
     Upload ingrediënten en bereidingswijze apart. U kunt per onderdeel 1 of 2 foto's kiezen. Smaakboek leest de foto's en zet alles daarna samen in één recept.
   </div>
@@ -209,7 +222,7 @@ button,input,textarea,select{font:inherit} button{cursor:pointer}.app{max-width:
     <div id="photoStepPreviewGrid" class="social-preview-grid"></div>
   </div>
 
-  <button class="primary" onclick="analyzePhotoGroupedScreenshots()">✦ Foto's met AI herkennen</button>
+  <button id="photoAiButton" class="primary" onclick="analyzePhotoGroupedScreenshots()">✦ Foto's met AI herkennen</button>
   <div id="photoLoading" class="loading">Foto's analyseren<br><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
 
   <div id="photoResult" class="photo-result">
@@ -320,7 +333,7 @@ function changeServingCount(id,delta){
   if(target)target.innerHTML=renderScaledIngredients(r,next);
 }
 
-function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${Number(r.people)>0?esc(r.people)+' personen':'Aantal personen niet ingesteld'}</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div><div class="block"><h2>Ingrediënten</h2>${Number(r.people)>0?`<div class="servings-control"><span>Hoeveel eten mee?</span><button onclick="changeServingCount('${r.id}',-1)">−</button><strong id="servingCount" data-value="${Number(r.people)}">${esc(r.people)} personen</strong><button onclick="changeServingCount('${r.id}',1)">＋</button></div>`:''}<div id="scaledIngredients">${renderScaledIngredients(r,Number(r.people)||1)}</div></div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
+function openRecipe(id){previous=document.querySelector('.screen.active')?.id||'home';currentId=id;const r=recipes.find(x=>x.id===id)||community.find(x=>x.id===id);if(!r)return;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('detail').classList.add('active');document.getElementById('detailHeart').textContent=r.favorite?'♥':'♡';const hero=document.querySelector('.detail-hero');hero.style.background=r.image?`url('${r.image}') center/cover no-repeat`:'linear-gradient(140deg,var(--brown),var(--terracotta) 55%,var(--caramel))';document.getElementById('detailBody').innerHTML=`<div class="detail-title"><div class="eyebrow">${esc(r.category)}</div><h1>${esc(r.title)}</h1><div class="authorline"><div class="author-dot">${esc((r.author||'U').slice(0,1))}</div><span>${r.author==='U'?'Uw recept':'Door '+esc(r.author)} · ${r.isPublic?'🌍 Openbaar':'🔒 Privé'}</span></div><div class="pillrow"><span class="pill">⏱ ${esc(r.time||'—')}</span><span class="pill">👥 ${Number(r.people)>0?esc(r.people)+' personen':'Aantal personen niet ingesteld'}</span><span class="pill">${esc(r.source||'Smaakboek')}</span></div></div><div class="sharebar"><button class="sharebtn soft" onclick="shareRecipe('${r.id}')">↗ Delen</button>${recipes.some(x=>x.id===r.id)?`<button class="sharebtn primaryish" onclick="toggleRecipePrivacy('${r.id}')">${r.isPublic?'Maak privé':'Maak openbaar'}</button><button class="sharebtn delete-recipe-btn" onclick="deleteRecipe('${r.id}')">🗑 Verwijderen</button>`:`<button class="sharebtn primaryish" onclick="saveCommunity('${r.id}')">＋ Bewaar recept</button>`}</div><div class="block"><h2>Ingrediënten</h2>${Number(r.people)>0?`<div class="servings-control"><span>Hoeveel eten mee?</span><button onclick="changeServingCount('${r.id}',-1)">−</button><strong id="servingCount" data-value="${Number(r.people)}">${esc(r.people)} personen</strong><button onclick="changeServingCount('${r.id}',1)">＋</button></div>`:''}<div id="scaledIngredients">${renderScaledIngredients(r,Number(r.people)||1)}</div></div><div class="block"><h2>Bereidingswijze</h2><div class="steps">${r.steps.map(s=>`<div class="step"><div>${esc(s)}</div></div>`).join('')}</div></div>${r.url?`<div class="block source"><div class="eyebrow">Originele bron</div><p style="margin:8px 0 0">Opgeslagen via ${esc(r.source)} · <a href="${r.url}" target="_blank">Bekijk origineel ↗</a></p></div>`:''}`;window.scrollTo(0,0)}
 function openCommunity(id){openRecipe(id)}
 function saveCommunity(id){const r=community.find(x=>x.id===id);if(!r)return;recipes.unshift({...r,id:'r'+Date.now(),favorite:false,author:'U',isPublic:false,source:'Community'});persist();renderAll();toast('Recept bewaard in uw Smaakboek')}
 function historyBack(){showScreen(previous==='detail'?'home':previous)}
@@ -558,6 +571,32 @@ async function toggleRecipePrivacy(id){
   if(error){console.error(error);toast('Privacy aanpassen is niet gelukt.');return}
   await loadOnlineData();openRecipe(id);toast(!r.isPublic?'Recept is nu openbaar':'Recept is nu privé');
 }
+async function deleteRecipe(id){
+  const u=await requireUser(); if(!u)return;
+  const r=recipes.find(x=>x.id===id);
+  if(!r){toast('Alleen uw eigen recept kan worden verwijderd.');return}
+
+  const ok=window.confirm(`Wilt u “${r.title}” echt verwijderen? Dit kan niet ongedaan worden gemaakt.`);
+  if(!ok)return;
+
+  try{
+    // Favoriet-relatie eerst opruimen. De gekoppelde ingrediënten en stappen
+    // worden door de database-relaties samen met het recept verwijderd.
+    await sb.from('favorites').delete().eq('user_id',u.id).eq('recipe_id',id);
+
+    const {error}=await sb.from('recipes').delete().eq('id',id).eq('user_id',u.id);
+    if(error)throw error;
+
+    await loadOnlineData();
+    currentId=null;
+    showScreen('recipes');
+    toast('Recept verwijderd.');
+  }catch(e){
+    console.error(e);
+    toast(e.message||'Recept verwijderen is niet gelukt.');
+  }
+}
+
 async function saveCommunity(id){
   const r=community.find(x=>x.id===id);if(!r)return;
   try{await insertRecipeRecord({title:r.title,category:r.category,time:r.time,servings:(Number(r.people)||null),ingredients:r.ingredients,steps:r.steps,isPublic:false,sourceType:'other',sourceUrl:r.url});await loadOnlineData();toast('Recept bewaard in uw Smaakboek')}catch(e){console.error(e);toast('Bewaren is niet gelukt.')}
@@ -572,17 +611,75 @@ function applyAiRecipe(rec,prefix){
   const total=(rec.prep_minutes||0)+(rec.cook_minutes||0);document.getElementById(prefix+'Time').value=total?total+' min':'';const servingsEl=document.getElementById(prefix+'Servings');if(servingsEl)servingsEl.value=rec.servings||'';
   if(rec.missing_information?.length) toast('AI-resultaat klaar. Controleer nog: '+rec.missing_information.slice(0,2).join(', '));
 }
+
+function amsterdamDay(){
+  try{
+    return new Intl.DateTimeFormat('en-CA',{
+      timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit'
+    }).format(new Date());
+  }catch{
+    return new Date().toISOString().slice(0,10);
+  }
+}
+
+function currentAiUsageFromUser(){
+  const md=currentUser?.app_metadata||{};
+  const used=(md.smaakboek_ai_day===amsterdamDay())?Number(md.smaakboek_ai_count||0):0;
+  return {used:Math.min(10,Math.max(0,used)),limit:10,remaining:Math.max(0,10-used)};
+}
+
+function updateAiUsage(usage){
+  if(!usage) usage=currentAiUsageFromUser();
+  const used=Math.max(0,Number(usage.used||0));
+  const limit=Math.max(1,Number(usage.limit||10));
+  const remaining=Math.max(0,Number(usage.remaining ?? (limit-used)));
+  const reached=remaining<=0;
+
+  ['socialAiLimit','photoAiLimit'].forEach(id=>{
+    const box=document.getElementById(id);
+    if(!box)return;
+    box.classList.toggle('limit-reached',reached);
+    const line=box.querySelector('.remaining');
+    if(line){
+      line.textContent=reached
+        ? `Vandaag ${used}/${limit} gebruikt. Morgen kunt u weer AI-recepten toevoegen.`
+        : `Vandaag ${used}/${limit} gebruikt — nog ${remaining} over.`;
+    }
+  });
+
+  ['socialAiButton','photoAiButton'].forEach(id=>{
+    const btn=document.getElementById(id);
+    if(!btn)return;
+    btn.classList.toggle('ai-disabled',reached);
+    btn.disabled=reached;
+  });
+
+  if(currentUser && usage.day){
+    currentUser.app_metadata={...(currentUser.app_metadata||{}),smaakboek_ai_day:usage.day,smaakboek_ai_count:used};
+  }
+}
+
 async function invokeAi(payload){
   const u=await requireUser();if(!u)throw new Error('Log eerst in.');
   try{
     const {data,error}=await sb.functions.invoke('analyze-recipe',{body:payload});
     if(error) throw error;
-    if(data?.error) throw new Error(data.error);
+    if(data?.usage) updateAiUsage(data.usage);
+    if(data?.error){
+      if(data?.code==='DAILY_AI_LIMIT'){
+        throw new Error('U heeft vandaag al 10 AI-recepten toegevoegd. Morgen kunt u weer AI gebruiken.');
+      }
+      throw new Error(data.error);
+    }
     return data.recipe;
   }catch(e){
     const msg=String(e?.message||e||'');
+    if(msg.includes('10 AI-recepten') || msg.includes('DAILY_AI_LIMIT')){
+      updateAiUsage({used:10,limit:10,remaining:0,day:amsterdamDay()});
+      throw new Error('U heeft vandaag al 10 AI-recepten toegevoegd. Morgen kunt u weer AI gebruiken.');
+    }
     if(msg.toLowerCase().includes('quota') || msg.includes('429')){
-      throw new Error('AI-limiet tijdelijk bereikt. Probeer het over ongeveer een minuut opnieuw.');
+      throw new Error('De Gemini-limiet is tijdelijk bereikt. Probeer het later opnieuw.');
     }
     if(msg.toLowerCase().includes('high demand') || msg.toLowerCase().includes('try again later') || msg.includes('503')){
       throw new Error('AI is tijdelijk druk. Probeer het over een minuut opnieuw.');
@@ -659,8 +756,8 @@ async function analyzePhotoGroupedScreenshots(){
     const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
     document.getElementById('photoTitle').value=rec?.title||'';document.getElementById('photoServings').value=rec?.servings||'';
-    document.getElementById('photoIngredients').value=ingredients.join('\\n');
-    document.getElementById('photoSteps').value=steps.join('\\n');
+    document.getElementById('photoIngredients').value=ingredients.join('\n');
+    document.getElementById('photoSteps').value=steps.join('\n');
     document.getElementById('photoTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('photoResult').classList.add('show');
 
@@ -842,8 +939,8 @@ async function analyzeGroupedScreenshots(){
     const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
     document.getElementById('aiTitle').value=rec?.title||'';document.getElementById('aiServings').value=rec?.servings||'';
-    document.getElementById('aiIngredients').value=ingredients.join('\\n');
-    document.getElementById('aiSteps').value=steps.join('\\n');
+    document.getElementById('aiIngredients').value=ingredients.join('\n');
+    document.getElementById('aiSteps').value=steps.join('\n');
     document.getElementById('aiTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('importResult').classList.add('show');
 
@@ -915,7 +1012,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
-sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(loadOnlineData,0)});
+sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(()=>{loadOnlineData();updateAiUsage();},0)});
 loadOnlineData();
 </script>
 
