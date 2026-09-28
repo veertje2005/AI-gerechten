@@ -3,7 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#F8F3EF" />
+<meta name="theme-color" content="#704524" />
+
+<meta name="description" content="Smaakboek is uw persoonlijke digitale kookboek voor eigen recepten, favorieten en nieuwe inspiratie." />
+<meta name="application-name" content="Smaakboek" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Smaakboek" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+
 <title>Smaakboek</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -443,6 +455,17 @@ async function analyzeLink(){
 
 sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setTimeout(loadOnlineData,0)});
 loadOnlineData();
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').catch(err => {
+      console.warn('Service worker kon niet worden geregistreerd:', err);
+    });
+  });
+}
 </script>
 
 </body>
