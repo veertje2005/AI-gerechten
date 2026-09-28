@@ -8,6 +8,10 @@
   "background_color": "#F8F3EF",
   "theme_color": "#704524",
   "orientation": "portrait-primary",
+  "id": "/",
+  "lang": "nl",
+  "categories": ["food", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-192.png",
