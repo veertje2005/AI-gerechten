@@ -510,22 +510,21 @@ function applyAiRecipe(rec,prefix){
 }
 async function invokeAi(payload){
   const u=await requireUser();if(!u)throw new Error('Log eerst in.');
-  let lastError=null;
-  for(let attempt=0;attempt<3;attempt++){
-    try{
-      const {data,error}=await sb.functions.invoke('analyze-recipe',{body:payload});
-      if(error) throw error;
-      if(data?.error) throw new Error(data.error);
-      return data.recipe;
-    }catch(e){
-      lastError=e;
-      const msg=String(e?.message||e||'').toLowerCase();
-      const temporary=msg.includes('high demand')||msg.includes('try again later')||msg.includes('overload')||msg.includes('429')||msg.includes('503')||msg.includes('temporar');
-      if(!temporary||attempt===2) throw e;
-      await new Promise(r=>setTimeout(r,1200*(attempt+1)));
+  try{
+    const {data,error}=await sb.functions.invoke('analyze-recipe',{body:payload});
+    if(error) throw error;
+    if(data?.error) throw new Error(data.error);
+    return data.recipe;
+  }catch(e){
+    const msg=String(e?.message||e||'');
+    if(msg.toLowerCase().includes('quota') || msg.includes('429')){
+      throw new Error('AI-limiet tijdelijk bereikt. Probeer het over ongeveer een minuut opnieuw.');
     }
+    if(msg.toLowerCase().includes('high demand') || msg.toLowerCase().includes('try again later') || msg.includes('503')){
+      throw new Error('AI is tijdelijk druk. Probeer het over een minuut opnieuw.');
+    }
+    throw e;
   }
-  throw lastError||new Error('AI is tijdelijk niet beschikbaar.');
 }
 const photoGroupedPreviewUrls={ingredient:[],steps:[]};
 
@@ -572,35 +571,44 @@ async function analyzePhotoGroupedScreenshots(){
     toast('Upload eerst minimaal één foto.');
     return;
   }
+  if(ingredientFiles.length>2 || stepFiles.length>2){
+    toast("U kunt per onderdeel maximaal 2 foto's toevoegen.");
+    return;
+  }
 
   document.getElementById('photoLoading').classList.add('show');
   document.getElementById('photoResult').classList.remove('show');
 
   try{
-    const ingredientResult=ingredientFiles.length
-      ? await analyzePhotoGroup(ingredientFiles,'ingredients')
-      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+    const ingredientImages=await filesToDataUrls(ingredientFiles);
+    const stepImages=await filesToDataUrls(stepFiles);
 
-    const stepResult=stepFiles.length
-      ? await analyzePhotoGroup(stepFiles,'steps')
-      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+    const rec=await invokeAi({
+      mode:'grouped_photos',
+      ingredient_images:ingredientImages,
+      step_images:stepImages,
+      language:currentLang
+    });
 
-    if((ingredientResult.successCount+stepResult.successCount)===0){
-      throw new Error("De foto's konden op dit moment niet worden gelezen. Probeer het later opnieuw.");
-    }
+    const ingredients=ingredientLinesFromAi(rec);
+    const steps=stepLinesFromAi(rec);
+    const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
-    document.getElementById('photoTitle').value=ingredientResult.title||stepResult.title||'';
-    document.getElementById('photoIngredients').value=(ingredientResult.ingredients||[]).join('\\n');
-    document.getElementById('photoSteps').value=(stepResult.steps||[]).join('\\n');
-
-    const totalMinutes=Math.max(ingredientResult.totalMinutes||0,stepResult.totalMinutes||0);
+    document.getElementById('photoTitle').value=rec?.title||'';
+    document.getElementById('photoIngredients').value=ingredients.join('\\n');
+    document.getElementById('photoSteps').value=steps.join('\\n');
     document.getElementById('photoTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('photoResult').classList.add('show');
 
     toast('Foto’s gelezen. Controleer het resultaat.');
   }catch(e){
     console.error(e);
-    toast(e.message||"Foto's analyseren is niet gelukt.");
+    const msg=String(e?.message||e||'');
+    if(msg.toLowerCase().includes('quota') || msg.includes('429')){
+      toast('De gratis AI-limiet is tijdelijk bereikt. Probeer het over ongeveer een minuut opnieuw.');
+    }else{
+      toast(msg||"Foto's analyseren is niet gelukt.");
+    }
   }finally{
     document.getElementById('photoLoading').classList.remove('show');
   }
@@ -699,6 +707,15 @@ function stepLinesFromAi(rec){
   return splitRecipeLines(rec?.steps||[]);
 }
 
+
+async function filesToDataUrls(files){
+  const urls=[];
+  for(const file of files){
+    urls.push(await fileToDataUrl(file));
+  }
+  return urls;
+}
+
 async function analyzePhotoGroup(files, wanted){
   let title='';
   let ingredients=[];
@@ -746,40 +763,35 @@ async function analyzeGroupedScreenshots(){
   document.getElementById('importResult').classList.remove('show');
 
   try{
-    const ingredientResult=ingredientFiles.length
-      ? await analyzePhotoGroup(ingredientFiles,'ingredients')
-      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+    const ingredientImages=await filesToDataUrls(ingredientFiles);
+    const stepImages=await filesToDataUrls(stepFiles);
 
-    const stepResult=stepFiles.length
-      ? await analyzePhotoGroup(stepFiles,'steps')
-      : {title:'',ingredients:[],steps:[],totalMinutes:0,successCount:0};
+    const rec=await invokeAi({
+      mode:'grouped_photos',
+      ingredient_images:ingredientImages,
+      step_images:stepImages,
+      language:currentLang
+    });
 
-    const totalSuccess=ingredientResult.successCount+stepResult.successCount;
-    if(!totalSuccess){
-      throw new Error("De foto's konden op dit moment niet worden gelezen. Probeer het later opnieuw.");
-    }
+    const ingredients=ingredientLinesFromAi(rec);
+    const steps=stepLinesFromAi(rec);
+    const totalMinutes=(Number(rec?.prep_minutes)||0)+(Number(rec?.cook_minutes)||0);
 
-    const title=ingredientResult.title||stepResult.title||'';
-    const ingredients=ingredientResult.ingredients||[];
-    const steps=stepResult.steps||[];
-    const totalMinutes=Math.max(ingredientResult.totalMinutes||0,stepResult.totalMinutes||0);
-
-    document.getElementById('aiTitle').value=title;
-    document.getElementById('aiIngredients').value=ingredients.join('\n');
-    document.getElementById('aiSteps').value=steps.join('\n');
+    document.getElementById('aiTitle').value=rec?.title||'';
+    document.getElementById('aiIngredients').value=ingredients.join('\\n');
+    document.getElementById('aiSteps').value=steps.join('\\n');
     document.getElementById('aiTime').value=totalMinutes?totalMinutes+' min':'';
     document.getElementById('importResult').classList.add('show');
 
-    if(!ingredientFiles.length){
-      toast('Bereidingswijze gelezen. Vul de ingrediënten eventueel handmatig aan.');
-    }else if(!stepFiles.length){
-      toast('Ingrediënten gelezen. Vul de bereidingswijze eventueel handmatig aan.');
-    }else{
-      toast('Ingrediënten en bereidingswijze zijn gelezen. Controleer het resultaat.');
-    }
+    toast('Foto’s gelezen. Controleer ingrediënten en bereidingswijze.');
   }catch(e){
     console.error(e);
-    toast(e.message||'Foto’s analyseren is niet gelukt.');
+    const msg=String(e?.message||e||'');
+    if(msg.toLowerCase().includes('quota') || msg.includes('429')){
+      toast('De gratis AI-limiet is tijdelijk bereikt. Probeer het over ongeveer een minuut opnieuw.');
+    }else{
+      toast(msg||'Foto’s analyseren is niet gelukt.');
+    }
   }finally{
     document.getElementById('loading').classList.remove('show');
   }
